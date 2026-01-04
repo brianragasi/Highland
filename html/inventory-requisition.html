@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Highland Fresh - Inventory Requisition</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        /* Inventory Requisition - Clean Highland Fresh Green Theme */
+        
+        /* Stats Cards - Unified green theme */
+        .stats-card {
+            text-align: center;
+            padding: 1.25rem;
+            transition: all 0.2s ease;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--hf-primary);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-card h2 {
+            font-size: 2rem;
+            margin-bottom: 0.25rem;
+            font-weight: 700;
+            color: var(--hf-primary);
+        }
+
+        .stats-card p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        /* Low Stock Alert Header - Green theme */
+        .alert-header {
+            background: var(--hf-primary);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .alert-header .badge {
+            background-color: rgba(255,255,255,0.2) !important;
+        }
+
+        /* Stock Status - Subtle, not screaming */
+        .stock-status {
+            padding: 0.25em 0.6em;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .stock-out {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .stock-low {
+            background-color: var(--hf-primary);
+            color: white;
+        }
+
+        .stock-ok {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        /* Priority badges - unified */
+        .priority-badge {
+            padding: 0.25em 0.6em;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .priority-urgent, .priority-high {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .priority-medium {
+            background-color: var(--hf-primary);
+            color: white;
+        }
+
+        .priority-low {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        /* Table Styling */
+        .table thead th {
+            background-color: var(--hf-primary);
+            color: white;
+            font-weight: 600;
+            border: none;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: var(--hf-primary-light);
+        }
+
+        /* Buttons - Green theme */
+        .btn-highland {
+            background: var(--hf-primary);
+            border-color: var(--hf-primary);
+            color: white;
+        }
+
+        .btn-highland:hover {
+            background: var(--hf-primary-hover);
+            border-color: var(--hf-primary-hover);
+            color: white;
+        }
+
+        .btn-outline-highland {
+            border: 1px solid var(--hf-primary);
+            color: var(--hf-primary);
+            background: transparent;
+        }
+
+        .btn-outline-highland:hover {
+            background: var(--hf-primary);
+            color: white;
+        }
+
+        /* Modal headers - Green theme */
+        .modal-header-highland {
+            background: var(--hf-primary);
+            color: white;
+        }
+
+        .modal-header-highland .btn-close {
+            filter: invert(1);
+        }
+
+        /* Nav tabs - Green theme */
+        .nav-tabs .nav-link {
+            color: var(--text-secondary);
+            border: none;
+            padding: 0.75rem 1rem;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: var(--hf-primary);
+            border: none;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--hf-primary);
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid var(--hf-primary);
+        }
+
+        .nav-tabs .nav-link .badge {
+            background-color: var(--hf-primary) !important;
+            color: white !important;
+        }
+
+        /* Alert row styling */
+        .alert-item {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .alert-item:hover {
+            background-color: var(--hf-primary-light);
+        }
+
+        .requisition-items-table {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="../images/highland_fresh_logo.jpg" alt="Highland Fresh Logo" class="navbar-logo">
+                Highland Fresh
+            </a>
+            <div class="navbar-nav ms-auto d-flex align-items-center">
+                <span class="navbar-text me-3">
+                    <i class="bi bi-person-circle me-1"></i>
+                    <span id="userNameDisplay">User</span> | <span id="userRoleDisplay">Role</span>
+                </span>
+                <button class="btn btn-outline-danger btn-sm" onclick="logout()">
+                    <i class="bi bi-box-arrow-right me-1"></i>Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4 mb-5">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-1"><i class="bi bi-box-seam me-2"></i>Inventory Requisition</h1>
+                <p class="text-muted mb-0">Low Stock Alerts & Purchase Requests</p>
+            </div>
+            <div>
+                <button class="btn btn-highland me-2" data-bs-toggle="modal" data-bs-target="#newRequisitionModal">
+                    <i class="bi bi-plus-lg me-1"></i>New Requisition
+                </button>
+                <button class="btn btn-outline-highland" onclick="loadDashboard()">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3 col-6">
+                <div class="card stats-card">
+                    <h2 id="statOutOfStock">0</h2>
+                    <p><i class="bi bi-exclamation-octagon me-1"></i>Out of Stock</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card stats-card">
+                    <h2 id="statLowStock">0</h2>
+                    <p><i class="bi bi-exclamation-triangle me-1"></i>Low Stock Items</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card stats-card">
+                    <h2 id="statPendingReq">0</h2>
+                    <p><i class="bi bi-clock-history me-1"></i>Pending Requisitions</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card stats-card">
+                    <h2 id="statApprovedReq">0</h2>
+                    <p><i class="bi bi-check-circle me-1"></i>Approved This Month</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Low Stock Alerts Widget -->
+        <div class="card mb-4" id="lowStockAlertsCard">
+            <div class="card-header alert-header">
+                <i class="bi bi-box-seam me-2"></i>
+                <strong>Low Stock Alerts</strong>
+                <span class="badge ms-2" id="lowStockBadge">0</span>
+                <button class="btn btn-sm btn-light float-end" onclick="createBulkRequisition()">
+                    <i class="bi bi-cart-plus me-1"></i>Request All
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>Item</th>
+                                <th>Category</th>
+                                <th class="text-end">Current</th>
+                                <th class="text-end">Reorder Lvl</th>
+                                <th class="text-end">Shortage</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lowStockTableBody">
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    <div class="spinner-border text-warning" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Requisitions List -->
+        <div class="card">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="requisitionTabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pendingTab">
+                            <i class="bi bi-clock me-1"></i>Pending <span class="badge"
+                                id="pendingBadge">0</span>
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#approvedTab">
+                            <i class="bi bi-check-circle me-1"></i>Approved
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#allTab">
+                            <i class="bi bi-list me-1"></i>All
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body p-0">
+                <div class="tab-content">
+                    <!-- Pending Tab -->
+                    <div class="tab-pane fade show active" id="pendingTab">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Req #</th>
+                                        <th>Date</th>
+                                        <th>Requested By</th>
+                                        <th>Priority</th>
+                                        <th>Items</th>
+                                        <th class="text-end">Est. Cost</th>
+                                        <th>Reason</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pendingRequisitionsBody">
+                                    <tr>
+                                        <td colspan="8" class="text-center py-4">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Approved Tab -->
+                    <div class="tab-pane fade" id="approvedTab">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Req #</th>
+                                        <th>Date</th>
+                                        <th>Requested By</th>
+                                        <th>Approved By</th>
+                                        <th>Items</th>
+                                        <th class="text-end">Est. Cost</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="approvedRequisitionsBody">
+                                    <tr>
+                                        <td colspan="8" class="text-center py-4">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- All Tab -->
+                    <div class="tab-pane fade" id="allTab">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Req #</th>
+                                        <th>Date</th>
+                                        <th>Requested By</th>
+                                        <th>Priority</th>
+                                        <th>Items</th>
+                                        <th class="text-end">Est. Cost</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="allRequisitionsBody">
+                                    <tr>
+                                        <td colspan="8" class="text-center py-4">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Requisition Modal -->
+    <div class="modal fade" id="newRequisitionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header modal-header-highland">
+                    <h5 class="modal-title"><i class="bi bi-cart-plus me-2"></i>Create Purchase Requisition</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <form id="newRequisitionForm">
+                    <div class="modal-body">
+                        <!-- Requisition Info -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Priority</label>
+                                <select class="form-select" id="reqPriority" name="priority">
+                                    <option value="LOW">Low</option>
+                                    <option value="MEDIUM" selected>Medium</option>
+                                    <option value="HIGH">High</option>
+                                    <option value="URGENT">Urgent</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Reason</label>
+                                <select class="form-select" id="reqReason" name="reason">
+                                    <option value="Low Stock Alert">Low Stock Alert</option>
+                                    <option value="Production Requirement">Production Requirement</option>
+                                    <option value="Emergency Replenishment">Emergency Replenishment</option>
+                                    <option value="Scheduled Restock">Scheduled Restock</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Additional Notes</label>
+                            <textarea class="form-control" id="reqNotes" name="notes" rows="2"
+                                placeholder="Any additional information..."></textarea>
+                        </div>
+
+                        <!-- Items Section -->
+                        <h6 class="border-bottom pb-2 mb-3">
+                            <i class="bi bi-list-check me-1"></i>Requested Items
+                        </h6>
+
+                        <div class="requisition-items-table">
+                            <table class="table table-sm" id="requisitionItemsTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 35%">Item</th>
+                                        <th style="width: 15%">Qty</th>
+                                        <th style="width: 15%">Unit</th>
+                                        <th style="width: 15%">Est. Cost</th>
+                                        <th style="width: 15%">Total</th>
+                                        <th style="width: 5%"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="requisitionItemsBody">
+                                    <!-- Items will be added here -->
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="4" class="text-end fw-bold">Estimated Total:</td>
+                                        <td class="fw-bold" id="requisitionTotal">₱0.00</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <button type="button" class="btn btn-outline-highland btn-sm" onclick="addRequisitionItem()">
+                            <i class="bi bi-plus-lg me-1"></i>Add Item
+                        </button>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-highland">
+                            <i class="bi bi-send me-1"></i>Submit Requisition
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Requisition Modal -->
+    <div class="modal fade" id="viewRequisitionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header modal-header-highland">
+                    <h5 class="modal-title"><i class="bi bi-eye me-2"></i>Requisition Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="viewRequisitionBody">
+                    <!-- Details loaded here -->
+                </div>
+                <div class="modal-footer" id="viewRequisitionFooter">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div class="toast align-items-center text-bg-success" role="alert" id="successToast">
+            <div class="d-flex">
+                <div class="toast-body" id="successToastBody">Success!</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+        <div class="toast align-items-center text-bg-danger" role="alert" id="errorToast">
+            <div class="d-flex">
+                <div class="toast-body" id="errorToastBody">Error!</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        // Global state
+        let rawMaterials = [];
+        let suppliers = [];
+        let currentUserRole = '';
+        let currentUserId = null;
+        let itemRowCounter = 0;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            checkAuth();
+            loadDashboard();
+            loadRawMaterials();
+            loadSuppliers();
+            setupEventListeners();
+        });
+
+        function checkAuth() {
+            console.log('checkAuth: Starting authentication check...');
+            const userData = sessionStorage.getItem('user');
+            console.log('checkAuth: userData from sessionStorage =', userData);
+
+            if (!userData) {
+                console.warn('checkAuth: No user data found, redirecting to login');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const user = JSON.parse(userData);
+                console.log('checkAuth: Parsed user =', user);
+                document.getElementById('userNameDisplay').textContent = user.full_name || user.username;
+                document.getElementById('userRoleDisplay').textContent = user.role || user.role_name || 'Staff';
+                currentUserRole = user.role || user.role_name || '';
+                currentUserId = user.user_id || user.id || null;
+                console.log('checkAuth: Authentication successful, role =', currentUserRole, 'userId =', currentUserId);
+            } catch (e) {
+                console.error('checkAuth: Error parsing user data', e);
+                window.location.href = 'login.html';
+            }
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        function setupEventListeners() {
+            document.getElementById('newRequisitionForm').addEventListener('submit', submitRequisition);
+        }
+
+        async function loadDashboard() {
+            try {
+                const [statsRes, lowStockRes] = await Promise.all([
+                    axios.get('../api/RequisitionAPI.php', { params: { operation: 'getDashboardStats' }, withCredentials: true }),
+                    axios.get('../api/RequisitionAPI.php', { params: { operation: 'getLowStockItems' }, withCredentials: true })
+                ]);
+
+                // Update stats
+                if (statsRes.data.success) {
+                    const stats = statsRes.data.data;
+                    document.getElementById('statOutOfStock').textContent = stats.out_of_stock_count;
+                    document.getElementById('statLowStock').textContent = stats.low_stock_count;
+                    document.getElementById('statPendingReq').textContent = stats.pending_requisitions;
+                    document.getElementById('statApprovedReq').textContent = stats.approved_this_month;
+                    document.getElementById('pendingBadge').textContent = stats.pending_requisitions;
+                }
+
+                // Update low stock table
+                if (lowStockRes.data.success) {
+                    renderLowStockTable(lowStockRes.data.data.items);
+                    document.getElementById('lowStockBadge').textContent = lowStockRes.data.data.count;
+                }
+
+                // Load requisitions
+                loadRequisitions();
+
+            } catch (error) {
+                console.error('Failed to load dashboard:', error);
+                showToast('Failed to load dashboard data', 'error');
+            }
+        }
+
+        function renderLowStockTable(items) {
+            const tbody = document.getElementById('lowStockTableBody');
+
+            if (!items || items.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            <i class="bi bi-check-circle fs-4 d-block mb-2 text-success"></i>
+                            All items are well-stocked!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = items.map(item => {
+                const statusClass = getStatusClass(item.stock_status);
+                const statusLabel = item.stock_status.replace('_', ' ');
+
+                return `
+                    <tr class="alert-item">
+                        <td>
+                            <strong>${item.item_name}</strong>
+                        </td>
+                        <td><span class="badge" style="background-color: var(--hf-primary-light); color: var(--hf-primary);">${item.category || 'N/A'}</span></td>
+                        <td class="text-end">${parseFloat(item.current_stock).toFixed(1)} ${item.unit_of_measure || ''}</td>
+                        <td class="text-end">${parseFloat(item.reorder_level).toFixed(1)}</td>
+                        <td class="text-end" style="color: #dc3545;">-${parseFloat(item.shortage_qty).toFixed(1)}</td>
+                        <td><span class="badge ${statusClass}">${statusLabel}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-highland" onclick="quickRequest(${item.raw_material_id}, '${item.item_name}', ${item.shortage_qty}, '${item.unit_of_measure || 'pcs'}')">
+                                <i class="bi bi-cart-plus"></i> Request
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function getStatusClass(status) {
+            switch (status) {
+                case 'OUT_OF_STOCK': return 'stock-out';
+                case 'CRITICAL': return 'stock-out';
+                case 'LOW': return 'stock-low';
+                default: return 'stock-ok';
+            }
+        }
+
+        async function loadRequisitions() {
+            try {
+                const [pendingRes, approvedRes, allRes] = await Promise.all([
+                    axios.get('../api/RequisitionAPI.php', { params: { operation: 'getRequisitions', status: 'PENDING' }, withCredentials: true }),
+                    axios.get('../api/RequisitionAPI.php', { params: { operation: 'getRequisitions', status: 'APPROVED' }, withCredentials: true }),
+                    axios.get('../api/RequisitionAPI.php', { params: { operation: 'getRequisitions' }, withCredentials: true })
+                ]);
+
+                if (pendingRes.data.success) {
+                    renderRequisitionsTable('pendingRequisitionsBody', pendingRes.data.data.requisitions, 'pending');
+                }
+                if (approvedRes.data.success) {
+                    renderRequisitionsTable('approvedRequisitionsBody', approvedRes.data.data.requisitions, 'approved');
+                }
+                if (allRes.data.success) {
+                    renderRequisitionsTable('allRequisitionsBody', allRes.data.data.requisitions, 'all');
+                }
+
+            } catch (error) {
+                console.error('Failed to load requisitions:', error);
+            }
+        }
+
+        function renderRequisitionsTable(tableId, requisitions, type) {
+            const tbody = document.getElementById(tableId);
+
+            if (!requisitions || requisitions.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted">No requisitions found</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = requisitions.map(req => {
+                const priorityClass = getPriorityClass(req.priority);
+                const statusBadge = getStatusBadge(req.status);
+                const cost = parseFloat(req.total_estimated_cost || 0).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' });
+
+                let actions = `<button class="btn btn-sm btn-outline-highland me-1" onclick="viewRequisition(${req.requisition_id})"><i class="bi bi-eye"></i></button>`;
+
+                if (type === 'pending') {
+                    // On this page, users can only VIEW or CANCEL their own pending requisitions
+                    const isOwnRequisition = currentUserId && (req.requested_by == currentUserId || req.requested_by_id == currentUserId);
+                    
+                    if (isOwnRequisition) {
+                        actions += `
+                            <button class="btn btn-sm btn-outline-danger" onclick="cancelRequisition(${req.requisition_id})" title="Cancel Request">
+                                <i class="bi bi-x-lg"></i> Cancel
+                            </button>
+                        `;
+                    } else {
+                        actions += `<span class="text-muted small">Awaiting approval</span>`;
+                    }
+                } else if (type === 'approved' && req.status === 'APPROVED') {
+                    actions += `
+                        <button class="btn btn-sm btn-highland" onclick="convertToPO(${req.requisition_id})" title="Convert to PO">
+                            <i class="bi bi-file-earmark-plus"></i> Create PO
+                        </button>
+                    `;
+                }
+
+                return `
+                    <tr>
+                        <td><strong>${req.requisition_number}</strong></td>
+                        <td>${formatDate(req.request_date)}</td>
+                        <td>${req.requested_by_name || 'N/A'}</td>
+                        ${type === 'approved' ? `<td>${req.approved_by_name || 'N/A'}</td>` : `<td><span class="badge ${priorityClass}">${req.priority}</span></td>`}
+                        <td>${req.item_count} item(s)</td>
+                        <td class="text-end">${cost}</td>
+                        ${type === 'pending' ? `<td>${req.reason || 'N/A'}</td>` : `<td>${statusBadge}</td>`}
+                        <td>${actions}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function getPriorityClass(priority) {
+            switch (priority) {
+                case 'URGENT': return 'priority-urgent';
+                case 'HIGH': return 'priority-high';
+                case 'MEDIUM': return 'priority-medium';
+                default: return 'priority-low';
+            }
+        }
+
+        function getStatusBadge(status) {
+            const styles = {
+                'PENDING': 'background-color: #6c757d; color: white;',
+                'APPROVED': 'background-color: var(--hf-primary); color: white;',
+                'REJECTED': 'background-color: #dc3545; color: white;',
+                'CANCELLED': 'background-color: #6c757d; color: white;',
+                'CONVERTED': 'background-color: var(--hf-primary); color: white;'
+            };
+            const labels = {
+                'PENDING': 'Pending',
+                'APPROVED': 'Approved',
+                'REJECTED': 'Rejected',
+                'CANCELLED': 'Cancelled',
+                'CONVERTED': 'Converted to PO'
+            };
+            const style = styles[status] || 'background-color: #6c757d; color: white;';
+            const label = labels[status] || 'Draft';
+            return `<span class="badge" style="${style}">${label}</span>`;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'N/A';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        async function loadRawMaterials() {
+            try {
+                console.log('[Requisition] Loading raw materials...');
+                const response = await axios.get('../api/RequisitionAPI.php', {
+                    params: { operation: 'getRawMaterials' },
+                    withCredentials: true
+                });
+                console.log('[Requisition] Raw materials response:', response.data);
+                if (response.data.success) {
+                    rawMaterials = response.data.data.raw_materials || [];
+                    console.log('[Requisition] Loaded', rawMaterials.length, 'raw materials');
+                } else {
+                    console.error('[Requisition] API error:', response.data.message);
+                    showToast('Failed to load raw materials: ' + response.data.message, 'error');
+                }
+            } catch (error) {
+                console.error('[Requisition] Failed to load raw materials:', error);
+                if (error.response?.status === 401) {
+                    console.warn('[Requisition] Authentication error - session may have expired');
+                    window.location.href = 'login.html';
+                } else {
+                    showToast('Failed to load raw materials', 'error');
+                }
+            }
+        }
+
+        async function loadSuppliers() {
+            try {
+                const response = await axios.get('../api/RequisitionAPI.php', {
+                    params: { operation: 'getSuppliers' },
+                    withCredentials: true
+                });
+                if (response.data.success) {
+                    suppliers = response.data.data.suppliers || [];
+                    console.log('[Requisition] Loaded', suppliers.length, 'suppliers');
+                }
+            } catch (error) {
+                console.error('[Requisition] Failed to load suppliers:', error);
+            }
+        }
+
+        // Quick request from low stock table
+        function quickRequest(rawMaterialId, itemName, shortageQty, unit) {
+            // Clear existing items
+            document.getElementById('requisitionItemsBody').innerHTML = '';
+            itemRowCounter = 0;
+
+            // Add the item
+            addRequisitionItem(rawMaterialId, itemName, Math.ceil(shortageQty * 1.5), unit);
+
+            // Set priority and reason
+            document.getElementById('reqPriority').value = shortageQty > 0 ? 'HIGH' : 'MEDIUM';
+            document.getElementById('reqReason').value = 'Low Stock Alert';
+
+            // Show modal
+            new bootstrap.Modal(document.getElementById('newRequisitionModal')).show();
+        }
+
+        function addRequisitionItem(rawMaterialId = '', itemName = '', qty = '', unit = 'pcs') {
+            itemRowCounter++;
+            const tbody = document.getElementById('requisitionItemsBody');
+
+            const materialOptions = rawMaterials.map(m =>
+                `<option value="${m.raw_material_id}" ${m.raw_material_id == rawMaterialId ? 'selected' : ''} 
+                    data-name="${m.name}" data-unit="${m.unit_of_measure || 'pcs'}" data-price="${m.current_price || m.unit_cost || 0}">${m.name} (${m.category || 'N/A'})</option>`
+            ).join('');
+
+            const row = document.createElement('tr');
+            row.id = `reqItem_${itemRowCounter}`;
+            row.innerHTML = `
+                <td>
+                    <select class="form-select form-select-sm" name="items[${itemRowCounter}][raw_material_id]" onchange="updateItemDetails(${itemRowCounter})" required>
+                        <option value="">Select item...</option>
+                        ${materialOptions}
+                    </select>
+                    <input type="hidden" name="items[${itemRowCounter}][item_name]" value="${itemName}">
+                </td>
+                <td>
+                    <input type="number" class="form-control form-control-sm" name="items[${itemRowCounter}][quantity_requested]" 
+                           value="${qty}" min="1" onchange="calculateRowTotal(${itemRowCounter})" required>
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm" name="items[${itemRowCounter}][unit_of_measure]" 
+                           value="${unit}" readonly>
+                </td>
+                <td>
+                    <input type="number" class="form-control form-control-sm" name="items[${itemRowCounter}][estimated_unit_cost]" 
+                           value="0" step="0.01" min="0" onchange="calculateRowTotal(${itemRowCounter})">
+                </td>
+                <td class="item-total-${itemRowCounter}">₱0.00</td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRequisitionItem(${itemRowCounter})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+
+            if (rawMaterialId) {
+                updateItemDetails(itemRowCounter);
+            }
+        }
+
+        function updateItemDetails(rowNum) {
+            const select = document.querySelector(`[name="items[${rowNum}][raw_material_id]"]`);
+            const option = select.options[select.selectedIndex];
+
+            if (option && option.value) {
+                document.querySelector(`[name="items[${rowNum}][item_name]"]`).value = option.dataset.name || '';
+                document.querySelector(`[name="items[${rowNum}][unit_of_measure]"]`).value = option.dataset.unit || 'pcs';
+                
+                // Auto-fill the current price from warehouse (FIFO price)
+                const currentPrice = parseFloat(option.dataset.price) || 0;
+                document.querySelector(`[name="items[${rowNum}][estimated_unit_cost]"]`).value = currentPrice.toFixed(2);
+                
+                // Recalculate row total
+                calculateRowTotal(rowNum);
+            }
+        }
+
+        function calculateRowTotal(rowNum) {
+            const qty = parseFloat(document.querySelector(`[name="items[${rowNum}][quantity_requested]"]`).value) || 0;
+            const cost = parseFloat(document.querySelector(`[name="items[${rowNum}][estimated_unit_cost]"]`).value) || 0;
+            const total = qty * cost;
+
+            document.querySelector(`.item-total-${rowNum}`).textContent = total.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' });
+
+            calculateGrandTotal();
+        }
+
+        function calculateGrandTotal() {
+            let grandTotal = 0;
+            document.querySelectorAll('[name$="[estimated_unit_cost]"]').forEach((costInput, index) => {
+                const rowNum = costInput.name.match(/\[(\d+)\]/)[1];
+                const qty = parseFloat(document.querySelector(`[name="items[${rowNum}][quantity_requested]"]`).value) || 0;
+                const cost = parseFloat(costInput.value) || 0;
+                grandTotal += qty * cost;
+            });
+
+            document.getElementById('requisitionTotal').textContent = grandTotal.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' });
+        }
+
+        function removeRequisitionItem(rowNum) {
+            document.getElementById(`reqItem_${rowNum}`)?.remove();
+            calculateGrandTotal();
+        }
+
+        async function submitRequisition(e) {
+            e.preventDefault();
+
+            const form = e.target;
+            const items = [];
+
+            // Collect items
+            document.querySelectorAll('#requisitionItemsBody tr').forEach(row => {
+                const rowNum = row.id.replace('reqItem_', '');
+                const rawMaterialId = document.querySelector(`[name="items[${rowNum}][raw_material_id]"]`)?.value;
+
+                if (rawMaterialId) {
+                    items.push({
+                        raw_material_id: rawMaterialId,
+                        item_name: document.querySelector(`[name="items[${rowNum}][item_name]"]`)?.value || '',
+                        quantity_requested: document.querySelector(`[name="items[${rowNum}][quantity_requested]"]`)?.value || 0,
+                        unit_of_measure: document.querySelector(`[name="items[${rowNum}][unit_of_measure]"]`)?.value || 'pcs',
+                        estimated_unit_cost: document.querySelector(`[name="items[${rowNum}][estimated_unit_cost]"]`)?.value || 0
+                    });
+                }
+            });
+
+            if (items.length === 0) {
+                showToast('Please add at least one item', 'error');
+                return;
+            }
+
+            try {
+                const response = await axios.post('../api/RequisitionAPI.php', {
+                    operation: 'createRequisition',
+                    priority: document.getElementById('reqPriority').value,
+                    reason: document.getElementById('reqReason').value,
+                    notes: document.getElementById('reqNotes').value,
+                    items: items
+                }, { withCredentials: true });
+
+                if (response.data.success) {
+                    showToast(`Requisition ${response.data.data.requisition_number} created successfully!`, 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('newRequisitionModal')).hide();
+                    form.reset();
+                    document.getElementById('requisitionItemsBody').innerHTML = '';
+                    loadDashboard();
+                } else {
+                    showToast(response.data.message || 'Failed to create requisition', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Failed to create requisition', 'error');
+            }
+        }
+
+        async function cancelRequisition(requisitionId) {
+            if (!confirm('Are you sure you want to cancel this requisition?')) return;
+
+            try {
+                const response = await axios.post('../api/RequisitionAPI.php', {
+                    operation: 'cancelRequisition',
+                    requisition_id: requisitionId
+                }, { withCredentials: true });
+
+                if (response.data.success) {
+                    showToast('Requisition cancelled', 'success');
+                    loadDashboard();
+                } else {
+                    showToast(response.data.message || 'Failed to cancel', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Failed to cancel requisition', 'error');
+            }
+        }
+
+        async function viewRequisition(requisitionId) {
+            try {
+                const response = await axios.get('../api/RequisitionAPI.php', {
+                    params: { operation: 'getRequisition', requisition_id: requisitionId },
+                    withCredentials: true
+                });
+
+                if (response.data.success) {
+                    const req = response.data.data.requisition;
+                    const statusBadge = getStatusBadge(req.status);
+                    const priorityClass = getPriorityClass(req.priority);
+
+                    let itemsHtml = req.items.map(item => `
+                        <tr>
+                            <td>${item.item_name}</td>
+                            <td class="text-end">${parseFloat(item.quantity_requested).toFixed(1)}</td>
+                            <td>${item.unit_of_measure}</td>
+                            <td class="text-end">${parseFloat(item.estimated_unit_cost || 0).toFixed(2)}</td>
+                            <td class="text-end">${parseFloat(item.estimated_total_cost || 0).toFixed(2)}</td>
+                        </tr>
+                    `).join('');
+
+                    document.getElementById('viewRequisitionBody').innerHTML = `
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p><strong>Requisition #:</strong> ${req.requisition_number}</p>
+                                <p><strong>Date:</strong> ${formatDate(req.request_date)}</p>
+                                <p><strong>Requested By:</strong> ${req.requested_by_name || 'N/A'}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Status:</strong> ${statusBadge}</p>
+                                <p><strong>Priority:</strong> <span class="badge ${priorityClass}">${req.priority}</span></p>
+                                <p><strong>Reason:</strong> ${req.reason || 'N/A'}</p>
+                            </div>
+                        </div>
+                        ${req.approved_by_name ? `<p><strong>Approved By:</strong> ${req.approved_by_name} on ${formatDate(req.approved_date)}</p>` : ''}
+                        ${req.rejection_reason ? `<p class="text-danger"><strong>Rejection Reason:</strong> ${req.rejection_reason}</p>` : ''}
+                        ${req.notes ? `<p><strong>Notes:</strong> ${req.notes}</p>` : ''}
+                        
+                        <h6 class="border-top pt-3 mt-3">Items</h6>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th class="text-end">Qty</th>
+                                    <th>Unit</th>
+                                    <th class="text-end">Unit Cost</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>${itemsHtml}</tbody>
+                        </table>
+                    `;
+
+                    new bootstrap.Modal(document.getElementById('viewRequisitionModal')).show();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Failed to load requisition details', 'error');
+            }
+        }
+
+        async function convertToPO(requisitionId) {
+            if (!confirm('Convert this requisition to a Purchase Order?')) return;
+
+            try {
+                const response = await axios.post('../api/RequisitionAPI.php', {
+                    operation: 'convertToPurchaseOrder',
+                    requisition_id: requisitionId
+                }, { withCredentials: true });
+
+                if (response.data.success) {
+                    showToast(`Purchase Order ${response.data.data.purchase_order_number} created!`, 'success');
+                    loadDashboard();
+                } else {
+                    showToast(response.data.message || 'Failed to create PO', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Failed to create Purchase Order', 'error');
+            }
+        }
+
+        async function createBulkRequisition() {
+            // Get all low stock items and create a single requisition
+            try {
+                const response = await axios.get('../api/RequisitionAPI.php', { params: { operation: 'getLowStockItems' } });
+
+                if (response.data.success && response.data.data.items.length > 0) {
+                    // Clear and populate items
+                    document.getElementById('requisitionItemsBody').innerHTML = '';
+                    itemRowCounter = 0;
+
+                    response.data.data.items.forEach(item => {
+                        addRequisitionItem(
+                            item.raw_material_id,
+                            item.item_name,
+                            Math.ceil(item.shortage_qty * 1.5),
+                            item.unit_of_measure || 'pcs'
+                        );
+                    });
+
+                    document.getElementById('reqPriority').value = 'HIGH';
+                    document.getElementById('reqReason').value = 'Low Stock Alert';
+                    document.getElementById('reqNotes').value = 'Bulk requisition for all low stock items';
+
+                    new bootstrap.Modal(document.getElementById('newRequisitionModal')).show();
+                } else {
+                    showToast('No low stock items to request', 'info');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Failed to create bulk requisition', 'error');
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toastId = type === 'success' ? 'successToast' : 'errorToast';
+            const bodyId = type === 'success' ? 'successToastBody' : 'errorToastBody';
+
+            document.getElementById(bodyId).textContent = message;
+            const toast = new bootstrap.Toast(document.getElementById(toastId));
+            toast.show();
+        }
+    </script>
+</body>
+
+</html>

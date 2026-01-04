@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Highland Fresh - QC Officer Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .aging-badge {
+            font-size: 0.75rem;
+        }
+
+        .aging-ok {
+            background-color: #198754;
+        }
+
+        .aging-warning {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .aging-critical {
+            background-color: #dc3545;
+        }
+
+        .aging-expired {
+            background-color: #343a40;
+        }
+
+        .aging-rejected {
+            background-color: #6c757d;
+            text-decoration: line-through;
+        }
+
+        .collection-row.rejected {
+            opacity: 0.6;
+            background-color: #f8f9fa;
+        }
+
+        .fifo-badge {
+            background-color: #0d6efd;
+            font-size: 0.65rem;
+        }
+
+        .alert-panel {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .stats-card {
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .stats-card h2 {
+            font-size: 2rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .stats-card p {
+            margin: 0;
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+
+        .aging-progress {
+            height: 8px;
+            border-radius: 4px;
+        }
+
+        .table-responsive {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .modal-lg {
+            max-width: 800px;
+        }
+
+        .qc-test-group {
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: #f8f9fa;
+        }
+
+        .qc-test-group h6 {
+            color: #495057;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .qc-test-group .form-label {
+            font-weight: 500;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .qc-test-group .form-control,
+        .qc-test-group .form-select {
+            font-size: 0.875rem;
+        }
+
+        .qc-test-group .row {
+            align-items: flex-start;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="../images/highland_fresh_logo.jpg" alt="Highland Fresh Logo" class="navbar-logo">
+                Highland Fresh
+            </a>
+            <div class="navbar-nav ms-auto d-flex align-items-center">
+                <span class="navbar-text me-3">
+                    <i class="bi bi-person-circle me-1"></i>
+                    <span id="userNameDisplay">QC Officer</span> | <span id="userRoleDisplay">Quality Control</span>
+                </span>
+                <button class="btn btn-outline-danger btn-sm" onclick="logout()">
+                    <i class="bi bi-box-arrow-right me-1"></i>Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4 mb-5">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-1"><i class="bi bi-clipboard-check me-2"></i>QC Officer Dashboard</h1>
+                <p class="text-muted mb-0">Milk Collection, Quality Control & FIFO Tracking</p>
+            </div>
+            <div>
+                <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#newCollectionModal">
+                    <i class="bi bi-plus-lg me-1"></i>New Collection
+                </button>
+                <button class="btn btn-outline-secondary" data-action="refresh">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3 col-6">
+                <div class="card stats-card">
+                    <h2 class="text-primary" id="statTotalCollections">0</h2>
+                    <p>Today's Collections</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card stats-card">
+                    <h2 class="text-success" id="statTotalLiters">0</h2>
+                    <p>Total Liters</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card stats-card">
+                    <h2 class="text-warning" id="statPendingCount">0</h2>
+                    <p>Pending Processing</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card stats-card">
+                    <h2 class="text-danger" id="statCriticalCount">0</h2>
+                    <p>Critical Alerts</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- PENDING DISCARD Section - Expired milk requiring action -->
+        <div class="card mb-4 border-danger" id="pendingDiscardCard" style="display: none;">
+            <div class="card-header bg-danger text-white">
+                <i class="bi bi-trash-fill me-2"></i>
+                <strong>Pending Discard - Expired Milk</strong>
+                <span class="badge bg-light text-danger ms-2" id="pendingDiscardCount">0</span>
+                <small class="float-end">These batches are 48h+ old and must be discarded</small>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 250px;">
+                    <table class="table table-hover table-sm mb-0">
+                        <thead class="table-danger sticky-top">
+                            <tr>
+                                <th>RMR #</th>
+                                <th>Supplier</th>
+                                <th>Collected</th>
+                                <th class="text-end">Liters</th>
+                                <th>Age</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendingDiscardTableBody">
+                            <!-- Expired items will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-danger-subtle">
+                <button class="btn btn-danger btn-sm" onclick="discardAllExpired()">
+                    <i class="bi bi-trash me-1"></i>Discard All Expired
+                </button>
+                <small class="text-muted ms-2">This will mark all expired batches as discarded and log them for
+                    reporting.</small>
+            </div>
+        </div>
+
+        <!-- Aging Alerts Panel -->
+        <div class="card mb-4" id="agingAlertsCard">
+            <div class="card-header bg-warning text-dark">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>Milk Aging Alerts - FIFO Priority</strong>
+                <span class="badge bg-dark ms-2" id="alertCountBadge">0</span>
+                <small class="float-end">Auto-refreshes every 30s</small>
+            </div>
+            <div class="card-body alert-panel" id="agingAlertsBody">
+                <div class="text-center py-3 text-muted" id="noAlertsMessage">
+                    <i class="bi bi-check-circle fs-4 d-block mb-2"></i>
+                    No aging alerts - All milk batches within safe time window
+                </div>
+                <div id="alertsList" class="d-none">
+                    <!-- Alerts will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Tabs -->
+        <ul class="nav nav-tabs mb-3" id="qcTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="collections-tab" data-bs-toggle="tab"
+                    data-bs-target="#collectionsPane" type="button">
+                    <i class="bi bi-list-ul me-1"></i>Collections
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="aging-tab" data-bs-toggle="tab" data-bs-target="#agingPane" type="button">
+                    <i class="bi bi-clock-history me-1"></i>Aging Status
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- Collections Tab -->
+            <div class="tab-pane fade show active" id="collectionsPane" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row align-items-center">
+                            <div class="col-md-4">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-outline-secondary active"
+                                        data-filter="all">All</button>
+                                    <button type="button" class="btn btn-outline-success"
+                                        data-filter="PENDING">Pending</button>
+                                    <button type="button" class="btn btn-outline-primary"
+                                        data-filter="PROCESSED">Processed</button>
+                                    <button type="button" class="btn btn-outline-danger"
+                                        data-filter="REJECTED">Rejected</button>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="date" class="form-control form-control-sm" id="filterDate" value=""
+                                    title="Filter by collection date (leave empty for all dates)">
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select form-select-sm" id="filterSupplier">
+                                    <option value="">All Suppliers</option>
+                                </select>
+                            </div>
+                            <div class="col-md-1">
+                                <button class="btn btn-outline-secondary btn-sm w-100" onclick="clearFilters()"
+                                    title="Clear all filters">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped mb-0">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>RMR #</th>
+                                        <th>Supplier/Farmer</th>
+                                        <th>Date/Time</th>
+                                        <th class="text-end">Delivered (L)</th>
+                                        <th class="text-end">Accepted (L)</th>
+                                        <th>Fat %</th>
+                                        <th>Acidity</th>
+                                        <th>Alcohol</th>
+                                        <th>Status</th>
+                                        <th>Age</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="collectionsTableBody">
+                                    <tr>
+                                        <td colspan="11" class="text-center py-4">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0 justify-content-center" id="collectionsPagination">
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aging Status Tab -->
+            <div class="tab-pane fade" id="agingPane" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-clock-history me-2"></i>Raw Milk Inventory - Age Status (FIFO Order)
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>Batch</th>
+                                        <th>Supplier</th>
+                                        <th class="text-end">Liters</th>
+                                        <th>Received</th>
+                                        <th>Age</th>
+                                        <th>Expires</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="agingStatusTableBody">
+                                    <tr>
+                                        <td colspan="8" class="text-center py-4">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Collection Modal -->
+    <div class="modal fade" id="newCollectionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>Log New Milk Collection</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <form id="newCollectionForm">
+                    <div class="modal-body">
+                        <!-- Basic Info -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">RMR Number</label>
+                                <input type="text" class="form-control" id="rmrNumber" readonly
+                                    placeholder="Auto-generated">
+                                <small class="text-muted">Auto-generated on save</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Collection Date <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="collectionDate" name="collection_date"
+                                    required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Collection Time <span class="text-danger">*</span></label>
+                                <input type="time" class="form-control" id="collectionTime" name="collection_time"
+                                    required>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-8">
+                                <label class="form-label">Supplier/Farmer <span class="text-danger">*</span></label>
+                                <select class="form-select" id="supplierId" name="supplier_id" required>
+                                    <option value="">Select Supplier...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Expiry Window</label>
+                                <select class="form-select" id="expiryHours" name="expiry_hours">
+                                    <option value="24">24 Hours</option>
+                                    <option value="36">36 Hours</option>
+                                    <option value="48" selected>48 Hours</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Quantity -->
+                        <div class="qc-test-group">
+                            <h6><i class="bi bi-droplet me-1"></i>Quantity (Liters)</h6>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Liters Delivered <span
+                                            class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="litersDelivered"
+                                        name="liters_delivered" step="0.1" min="0" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Liters Rejected</label>
+                                    <input type="number" class="form-control" id="litersRejected" name="liters_rejected"
+                                        step="0.1" min="0" value="0">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Liters Accepted</label>
+                                    <input type="number" class="form-control" id="litersAccepted" readonly>
+                                    <small class="text-muted">Auto-calculated</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- QC Tests -->
+                        <div class="qc-test-group">
+                            <h6><i class="bi bi-clipboard-check me-1"></i>Quality Control Tests</h6>
+                            <div class="row g-3">
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label">Temperature (°C)</label>
+                                    <input type="number" class="form-control" id="temperature" name="temperature"
+                                        step="0.1" placeholder="e.g., 4.5">
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label">Fat Content (%)</label>
+                                    <input type="number" class="form-control" id="fatContent" name="fat_content"
+                                        step="0.1" min="0" max="10" placeholder="e.g., 3.5">
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label">Acidity (%)</label>
+                                    <input type="number" class="form-control" id="titratableAcidity"
+                                        name="titratable_acidity" step="0.01" min="0" max="1" placeholder="e.g., 0.14">
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label">pH Level</label>
+                                    <input type="number" class="form-control" id="phLevel" name="ph_level" step="0.1"
+                                        min="0" max="14" placeholder="e.g., 6.6">
+                                </div>
+                            </div>
+                            <div class="row g-3 mt-2">
+                                <div class="col-md-4">
+                                    <label class="form-label">Alcohol Test</label>
+                                    <select class="form-select" id="alcoholTestPassed" name="alcohol_test_passed">
+                                        <option value="">Not Tested</option>
+                                        <option value="1">✓ Passed</option>
+                                        <option value="0">✗ Failed</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Antibiotics Detected</label>
+                                    <select class="form-select" id="antibioticsDetected" name="antibiotics_detected">
+                                        <option value="">Not Tested</option>
+                                        <option value="0">✓ Negative</option>
+                                        <option value="1">✗ Positive</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Transport Provided</label>
+                                    <select class="form-select" id="transportProvided" name="transport_provided">
+                                        <option value="1">Yes (Company Vehicle)</option>
+                                        <option value="0">No (Farmer Delivery)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pricing -->
+                        <div class="qc-test-group">
+                            <h6><i class="bi bi-coin me-1"></i>Pricing</h6>
+
+                            <!-- Price Change Preview Alert (GAP FIX) -->
+                            <div id="priceChangePreview" class="alert alert-info mb-3 d-none">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="bi bi-graph-up me-2"></i>
+                                        <strong>Avg price (last 30 days):</strong>
+                                        <span id="avgPriceDisplay">₱40.00/L</span>
+                                    </div>
+                                    <span id="priceRangeDisplay" class="small text-muted">(Range: ₱38-42)</span>
+                                </div>
+                            </div>
+                            <div id="priceChangeWarning" class="alert alert-warning mb-3 d-none">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                <strong>Price Change Detected!</strong>
+                                <span id="priceChangeText">Entered price differs from average.</span>
+                                <br><small class="text-muted">BOM for milk-based products will be recalculated on
+                                    accept.</small>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Base Price/Liter (₱)</label>
+                                    <input type="number" class="form-control" id="basePricePerLiter"
+                                        name="base_price_per_liter" step="0.01" value="40.00"
+                                        onchange="checkPriceChange()" oninput="checkPriceChange()">
+                                    <small class="text-muted">Based on Fat%: ≥4%=₱42, 3.5-3.9%=₱40, &lt;3.5%=₱38</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Transport Fee/Liter (₱)</label>
+                                    <input type="number" class="form-control" id="transportFee" name="transport_fee"
+                                        step="0.01" value="0.00">
+                                    <small class="text-muted">Deduction if farmer delivers</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Estimated Total (₱)</label>
+                                    <input type="text" class="form-control" id="estimatedTotal" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="mb-3">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-control" id="collectionNotes" name="notes" rows="2"
+                                placeholder="Any observations or issues..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-lg me-1"></i>Save Collection
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rejection Modal -->
+    <div class="modal fade" id="rejectionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="bi bi-x-circle me-2"></i>Reject Milk Collection</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <form id="rejectionForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="rejectCollectionId" name="collection_id">
+
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Rejecting RMR #<strong id="rejectRmrNumber"></strong>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Liters to Reject <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="rejectLiters" name="liters_rejected"
+                                step="0.1" min="0" required>
+                            <small class="text-muted">Max: <span id="rejectMaxLiters">0</span> liters</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Rejection Reason <span class="text-danger">*</span></label>
+                            <select class="form-select" id="rejectionReason" name="rejection_reason" required>
+                                <option value="">Select reason...</option>
+                                <option value="High Acidity">High Acidity (>0.18%)</option>
+                                <option value="Adulteration">Adulteration Detected</option>
+                                <option value="Off-Odor">Off-Odor / Abnormal Smell</option>
+                                <option value="Foreign Matter">Foreign Matter / Contamination</option>
+                                <option value="High Bacteria Count">High Bacteria Count</option>
+                                <option value="Antibiotics Positive">Antibiotics Positive</option>
+                                <option value="Failed Alcohol Test">Failed Alcohol Test</option>
+                                <option value="Expired">Expired / Spoiled</option>
+                                <option value="Low Fat Content">Low Fat Content</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Additional Notes</label>
+                            <textarea class="form-control" id="rejectionNotes" name="notes" rows="2"
+                                placeholder="Additional details..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-x-circle me-1"></i>Confirm Rejection
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Details Modal -->
+    <div class="modal fade" id="viewDetailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title"><i class="bi bi-eye me-2"></i>Collection Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="viewDetailsBody">
+                    <!-- Details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-warning" id="btnPrioritize" onclick="prioritizeFromModal()">
+                        <i class="bi bi-arrow-up-circle me-1"></i>Prioritize for Production
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" id="toastContainer">
+        <div class="toast align-items-center text-bg-success" role="alert" aria-live="assertive" aria-atomic="true"
+            id="successToast">
+            <div class="d-flex">
+                <div class="toast-body" id="successToastBody">
+                    <i class="bi bi-check-circle me-2"></i>Operation successful!
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
+        </div>
+        <div class="toast align-items-center text-bg-danger" role="alert" aria-live="assertive" aria-atomic="true"
+            id="errorToast">
+            <div class="d-flex">
+                <div class="toast-body" id="errorToastBody">
+                    <i class="bi bi-exclamation-circle me-2"></i>An error occurred!
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
+        </div>
+        <!-- Critical Alert Toast -->
+        <div class="toast align-items-center text-bg-warning" role="alert" aria-live="assertive" aria-atomic="true"
+            id="criticalAlertToast">
+            <div class="d-flex">
+                <div class="toast-body" id="criticalAlertToastBody">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Critical milk aging alert!
+                </div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="../js/qc-dashboard.js"></script>
+    <script>
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        // Auto-calculate accepted liters
+        document.getElementById('litersDelivered')?.addEventListener('input', calculateAccepted);
+        document.getElementById('litersRejected')?.addEventListener('input', calculateAccepted);
+
+        function calculateAccepted() {
+            const delivered = parseFloat(document.getElementById('litersDelivered').value) || 0;
+            const rejected = parseFloat(document.getElementById('litersRejected').value) || 0;
+            document.getElementById('litersAccepted').value = Math.max(0, delivered - rejected).toFixed(1);
+            calculateEstimatedTotal();
+        }
+
+        // Auto-calculate price based on fat content
+        document.getElementById('fatContent')?.addEventListener('input', calculatePrice);
+        document.getElementById('transportProvided')?.addEventListener('change', calculatePrice);
+
+        function calculatePrice() {
+            const fatContent = parseFloat(document.getElementById('fatContent').value) || 3.5;
+            const transportProvided = document.getElementById('transportProvided').value === '1';
+
+            let basePrice = 40.00;
+            if (fatContent >= 4.0) basePrice = 42.00;
+            else if (fatContent < 3.5) basePrice = 38.00;
+
+            document.getElementById('basePricePerLiter').value = basePrice.toFixed(2);
+
+            // Transport deduction if farmer delivers
+            const transportFee = transportProvided ? 0 : 2.00;
+            document.getElementById('transportFee').value = transportFee.toFixed(2);
+
+            calculateEstimatedTotal();
+        }
+
+        function calculateEstimatedTotal() {
+            const accepted = parseFloat(document.getElementById('litersAccepted').value) || 0;
+            const basePrice = parseFloat(document.getElementById('basePricePerLiter').value) || 40;
+            const transportFee = parseFloat(document.getElementById('transportFee').value) || 0;
+
+            const total = accepted * (basePrice - transportFee);
+            document.getElementById('estimatedTotal').value = '₱' + total.toFixed(2);
+        }
+
+        // Set default date/time when modal opens
+        document.getElementById('newCollectionModal')?.addEventListener('show.bs.modal', function () {
+            const now = new Date();
+            document.getElementById('collectionDate').value = now.toISOString().split('T')[0];
+            document.getElementById('collectionTime').value = now.toTimeString().slice(0, 5);
+            document.getElementById('litersDelivered').value = '';
+            document.getElementById('litersRejected').value = '0';
+            document.getElementById('litersAccepted').value = '';
+            document.getElementById('estimatedTotal').value = '';
+        });
+        // NOTE: Date filter defaults to empty to show all dates (last 30 days from API)
+        // To filter to today only, uncomment the line below:
+        // document.getElementById('filterDate').value = new Date().toISOString().split('T')[0];
+    </script>
+
+    <!-- GAP 3 FIX: Discard Reason Modal for Spoilage Logging -->
+    <div class="modal fade" id="discardReasonModal" tabindex="-1" aria-labelledby="discardReasonModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="discardReasonModalLabel">
+                        <i class="bi bi-trash me-2"></i>
+                        <span id="discardReasonModalTitle">Discard Expired Milk</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong id="discardLitersInfo">0L will be logged as spoilage</strong>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="discardReasonCode" class="form-label">
+                            Reason Code <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" id="discardReasonCode" required>
+                            <option value="">-- Select Reason --</option>
+                            <option value="EXPIRED">EXPIRED - 48h+ age limit exceeded</option>
+                            <option value="HIGH_ACIDITY">HIGH_ACIDITY - Failed acidity test</option>
+                            <option value="CONTAMINATION">CONTAMINATION - Foreign matter detected</option>
+                            <option value="ANTIBIOTICS">ANTIBIOTICS - Positive antibiotic test</option>
+                            <option value="REJECTED">REJECTED - Quality standards not met</option>
+                            <option value="OTHER">OTHER - See notes</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="discardNotes" class="form-label">Notes (Optional)</label>
+                        <textarea class="form-control" id="discardNotes" rows="2"
+                            placeholder="Additional details..."></textarea>
+                    </div>
+
+                    <div class="text-muted small">
+                        <i class="bi bi-info-circle me-1"></i>
+                        This action will log the spoilage for Finance Officer reporting.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDiscardWithReason()">
+                        <i class="bi bi-trash me-1"></i>Confirm Discard
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

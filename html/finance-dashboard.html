@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Highland Fresh - Finance Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        /* Finance Dashboard - Clean Highland Fresh Green Theme */
+        
+        /* ========== UNIFIED COLOR SCHEME ========== */
+        /* Primary: Green (Highland Fresh brand) */
+        /* Secondary: Neutral grays */
+        /* Accent: Only use other colors for critical alerts */
+        
+        .stat-card-finance {
+            background: var(--surface-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            height: 100%;
+            transition: all 0.2s ease;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card-finance:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-color: var(--hf-primary);
+        }
+
+        .stat-card-finance .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background-color: var(--hf-primary-light);
+            color: var(--hf-primary);
+        }
+
+        .stat-card-finance .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            color: var(--text-primary);
+        }
+
+        .stat-card-finance .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .text-hf-primary {
+            color: var(--hf-primary) !important;
+        }
+
+        .bg-hf-primary {
+            background-color: var(--hf-primary) !important;
+        }
+
+        .dashboard-section {
+            background: var(--surface-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--hf-primary);
+        }
+
+        /* Clean Navigation - No crazy colors */
+        .nav-pills-finance .nav-link {
+            color: var(--text-secondary);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+            border: none;
+        }
+
+        .nav-pills-finance .nav-link:hover {
+            color: var(--hf-primary);
+            background-color: var(--hf-primary-light);
+        }
+
+        .nav-pills-finance .nav-link.active {
+            background-color: var(--hf-primary);
+            color: white;
+            border-radius: 6px;
+        }
+
+        /* Single badge style - just a count, not screaming colors */
+        .nav-pills-finance .badge {
+            font-size: 0.65rem;
+            padding: 0.2em 0.5em;
+            background-color: rgba(0,0,0,0.2) !important;
+            color: inherit !important;
+        }
+
+        .nav-pills-finance .nav-link.active .badge {
+            background-color: rgba(255,255,255,0.3) !important;
+            color: white !important;
+        }
+
+        /* Clean Table Styling */
+        .table-finance thead th {
+            background-color: var(--hf-primary);
+            color: white;
+            font-weight: 600;
+            padding: 0.875rem 0.75rem;
+            border: none;
+        }
+
+        .table-finance tbody td {
+            padding: 0.875rem 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .table-finance tbody tr:hover {
+            background-color: var(--hf-primary-light);
+        }
+
+        /* Unified Button Styles */
+        .btn-highland {
+            background: var(--hf-primary);
+            border-color: var(--hf-primary);
+            color: white;
+        }
+
+        .btn-highland:hover {
+            background: var(--hf-primary-hover);
+            border-color: var(--hf-primary-hover);
+            color: white;
+        }
+
+        .btn-outline-highland {
+            border: 1px solid var(--hf-primary);
+            color: var(--hf-primary);
+            background: transparent;
+        }
+
+        .btn-outline-highland:hover {
+            background: var(--hf-primary);
+            color: white;
+        }
+
+        /* Stat Cards - Clean, unified look */
+        .card-stat {
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+            background: var(--surface-color);
+        }
+
+        .card-stat:hover {
+            border-color: var(--hf-primary);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-stat .card-body {
+            padding: 1.25rem;
+        }
+
+        .card-stat h3 {
+            color: var(--hf-primary);
+            font-weight: 700;
+        }
+
+        /* Modal header - green theme */
+        .modal-header-highland {
+            background: var(--hf-primary);
+            color: white;
+            border-bottom: none;
+        }
+
+        .modal-header-highland .modal-title {
+            color: white;
+            font-weight: 600;
+        }
+
+        .modal-header-highland .btn-close {
+            filter: invert(1);
+        }
+
+        /* Priority badges - subtle, not screaming */
+        .badge-priority-high {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .badge-priority-medium {
+            background-color: var(--hf-primary);
+            color: white;
+        }
+
+        .badge-priority-low {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        /* Status badges - unified */
+        .badge-status-pending {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .badge-status-approved {
+            background-color: var(--hf-primary);
+            color: white;
+        }
+
+        .badge-status-rejected {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        /* Action button group - clean */
+        .btn-group-actions .btn {
+            padding: 0.375rem 0.75rem;
+        }
+
+        .btn-group-actions .btn-view {
+            background: var(--hf-primary-light);
+            color: var(--hf-primary);
+            border: none;
+        }
+
+        .btn-group-actions .btn-view:hover {
+            background: var(--hf-primary);
+            color: white;
+        }
+
+        .btn-group-actions .btn-approve {
+            background: var(--hf-primary);
+            color: white;
+            border: none;
+        }
+
+        .btn-group-actions .btn-approve:hover {
+            background: var(--hf-primary-hover);
+        }
+
+        .btn-group-actions .btn-reject {
+            background: #f8f9fa;
+            color: #dc3545;
+            border: 1px solid #dc3545;
+        }
+
+        .btn-group-actions .btn-reject:hover {
+            background: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="text-center">
+            <div class="spinner-border text-hf-primary" role="status"
+                style="width: 3rem; height: 3rem; color: var(--hf-primary);"></div>
+            <p class="mt-2 fw-bold" style="color: var(--hf-primary);">Loading...</p>
+        </div>
+    </div>
+
+    <!-- Navigation Bar - Aligned with Highland Fresh Theme -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="../images/highland_fresh_logo.jpg" alt="Highland Fresh Logo" class="navbar-logo">
+                Highland Fresh - Finance
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav nav-pills-finance me-auto ms-4">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" onclick="showTab('overview')">
+                            <i class="bi bi-speedometer2 me-1"></i>Overview
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showTab('spoilage')">
+                            <i class="bi bi-exclamation-triangle me-1"></i>Spoilage
+                            <span class="badge bg-danger ms-1" id="spoilageBadge">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showTab('payouts')">
+                            <i class="bi bi-cash-coin me-1"></i>Payouts
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showTab('fifo')">
+                            <i class="bi bi-shield-check me-1"></i>FIFO
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showTab('requisitions')">
+                            <i class="bi bi-file-earmark-text me-1"></i>Requisitions
+                            <span class="badge bg-warning text-dark ms-1" id="requisitionBadge">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showTab('receivables')">
+                            <i class="bi bi-receipt-cutoff me-1"></i>AR Collection
+                            <span class="badge bg-info ms-1" id="arBadge">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showTab('alerts')">
+                            <i class="bi bi-bell me-1"></i>Cost Alerts
+                            <span class="badge bg-warning text-dark ms-1" id="alertsBadge">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showTab('approvals')">
+                            <i class="bi bi-clipboard-check me-1"></i>Approvals
+                            <span class="badge bg-danger ms-1" id="approvalsBadge">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showTab('recipes')">
+                            <i class="bi bi-journal-bookmark me-1"></i>Master Recipes
+                        </a>
+                    </li>
+                </ul>
+                <div class="navbar-nav ms-auto d-flex align-items-center">
+                    <span class="navbar-text me-3" id="userWelcome">
+                        <i class="bi bi-person-circle me-1"></i>
+                        <span id="userNameDisplay">Finance Officer</span>
+                    </span>
+                    <button class="btn btn-outline-danger btn-sm" onclick="logout()">
+                        <i class="bi bi-box-arrow-right me-1"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4 mb-5">
+        <!-- Overview Tab -->
+        <div id="overviewTab" class="tab-content">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="dashboard-title mb-2">
+                        <i class="bi bi-graph-up-arrow me-2"></i>Finance Dashboard
+                    </h1>
+                    <p class="dashboard-subtitle mb-0">
+                        <i class="bi bi-briefcase-fill me-1"></i>
+                        Manage spoilage, farmer payouts, FIFO compliance, and accounts receivable
+                    </p>
+                </div>
+            </div>
+
+            <!-- Stats Cards Row - Aligned with Theme -->
+            <div class="row g-4 mb-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card-finance">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="stat-value" id="totalSpoilageLoss">₱0</div>
+                                <div class="stat-label">Total Spoilage Loss (YTD)</div>
+                            </div>
+                            <div class="stat-icon stat-icon-danger">
+                                <i class="bi bi-trash"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card-finance">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="stat-value" id="expiredBatchCount">0</div>
+                                <div class="stat-label">Expired Batches</div>
+                            </div>
+                            <div class="stat-icon stat-icon-warning">
+                                <i class="bi bi-calendar-x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card-finance">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="stat-value" id="pendingPayouts">₱0</div>
+                                <div class="stat-label">Pending Farmer Payouts</div>
+                            </div>
+                            <div class="stat-icon stat-icon-info">
+                                <i class="bi bi-hourglass-split"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card-finance">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="stat-value text-hf-primary" id="fifoComplianceRate">100%</div>
+                                <div class="stat-label">FIFO Compliance Rate</div>
+                            </div>
+                            <div class="stat-icon stat-icon-success">
+                                <i class="bi bi-check-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alert Panel for Expired Inventory -->
+            <div class="row mb-4" id="expiredAlertPanel" style="display: none;">
+                <div class="col-12">
+                    <div class="alert alert-panel alert-danger d-flex align-items-center" role="alert">
+                        <i class="bi bi-exclamation-octagon-fill fs-3 me-3"></i>
+                        <div class="flex-grow-1">
+                            <h5 class="alert-heading mb-1">⚠️ Expired Inventory Requires Attention</h5>
+                            <p class="mb-0">
+                                <span id="expiredAlertCount">0</span> batch(es) have expired with
+                                <span id="expiredAlertValue">₱0</span> in potential losses.
+                                <a href="#" onclick="showTab('spoilage')" class="alert-link">Review and process
+                                    write-offs →</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two Column Layout -->
+            <div class="row">
+                <!-- Left Column: At-Risk Inventory -->
+                <div class="col-lg-6 mb-4">
+                    <div class="dashboard-section h-100">
+                        <h5 class="section-title">
+                            <i class="bi bi-exclamation-diamond" style="color: var(--hf-primary);"></i>
+                            Inventory At Risk (Expiring in 3 Days)
+                        </h5>
+                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                            <table class="table table-finance table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Batch</th>
+                                        <th>Expiry</th>
+                                        <th class="text-end">Qty</th>
+                                        <th class="text-end">Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="atRiskTableBody">
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-4">
+                                            <i class="bi bi-check-circle fs-1" style="color: var(--hf-primary);"></i>
+                                            <p class="mt-2">No inventory at risk</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Recent Payouts -->
+                <div class="col-lg-6 mb-4">
+                    <div class="dashboard-section h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="section-title mb-0">
+                                <i class="bi bi-cash-stack" style="color: var(--hf-primary);"></i>
+                                Recent Farmer Payouts
+                            </h5>
+                            <button class="btn btn-sm btn-outline-highland" onclick="showTab('payouts')">
+                                View All
+                            </button>
+                        </div>
+                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                            <table class="table table-finance table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Reference</th>
+                                        <th>Supplier</th>
+                                        <th>Period</th>
+                                        <th class="text-end">Amount</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentPayoutsTableBody">
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-4">
+                                            <i class="bi bi-inbox fs-1"></i>
+                                            <p class="mt-2">No recent payouts</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Spoilage Tab -->
+        <div id="spoilageTab" class="tab-content" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="dashboard-title mb-2">
+                        <i class="bi bi-exclamation-triangle me-2"></i>Spoilage & Loss Management
+                    </h1>
+                    <p class="dashboard-subtitle mb-0">Track expired inventory and manage write-offs</p>
+                </div>
+                <div>
+                    <button class="btn btn-outline-highland me-2" onclick="scanExpiredBatches()">
+                        <i class="bi bi-search me-1"></i>Scan Expired
+                    </button>
+                    <button class="btn btn-highland" onclick="openRecordSpoilageModal()">
+                        <i class="bi bi-plus-lg me-1"></i>Record Spoilage
+                    </button>
+                </div>
+            </div>
+
+            <!-- Expired Batches Section -->
+            <div class="dashboard-section">
+                <h5 class="section-title">
+                    <i class="bi bi-calendar-x" style="color: var(--hf-primary);"></i>
+                    Expired Batches with Remaining Inventory
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-finance table-hover">
+                        <thead>
+                            <tr>
+                                <th>Batch #</th>
+                                <th>Product</th>
+                                <th>Production Date</th>
+                                <th>Expiry Date</th>
+                                <th>Days Expired</th>
+                                <th class="text-end">Qty Remaining</th>
+                                <th class="text-end">Loss Value</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expiredBatchesTableBody">
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-4">
+                                    <i class="bi bi-check-circle fs-1" style="color: var(--hf-primary);"></i>
+                                    <p class="mt-2">No expired batches found</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="fw-bold" style="background-color: var(--hf-primary-light);">
+                                <td colspan="5">Total</td>
+                                <td class="text-end" id="totalExpiredQty">0</td>
+                                <td class="text-end text-danger" id="totalExpiredValue">₱0</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Spoilage Log Section -->
+            <div class="dashboard-section">
+                <h5 class="section-title">
+                    <i class="bi bi-journal-text text-secondary"></i>
+                    Spoilage Log
+                </h5>
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <select class="form-select form-select-sm" id="spoilageStatusFilter"
+                            onchange="loadSpoilageLog()">
+                            <option value="">All Status</option>
+                            <option value="PENDING">Pending</option>
+                            <option value="APPROVED">Approved</option>
+                            <option value="WRITTEN_OFF">Written Off</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select form-select-sm" id="spoilageTypeFilter" onchange="loadSpoilageLog()">
+                            <option value="">All Types</option>
+                            <option value="EXPIRED">Expired</option>
+                            <option value="DAMAGED">Damaged</option>
+                            <option value="CONTAMINATED">Contaminated</option>
+                            <option value="FIFO_BYPASS">FIFO Bypass</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-finance table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Reference</th>
+                                <th>Date</th>
+                                <th>Item</th>
+                                <th>Type</th>
+                                <th class="text-end">Qty</th>
+                                <th class="text-end">Loss</th>
+                                <th>FIFO</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="spoilageLogTableBody">
+                            <tr>
+                                <td colspan="9" class="text-center text-muted py-4">
+                                    No spoilage records found
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payouts Tab -->
+        <div id="payoutsTab" class="tab-content" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="dashboard-title mb-2">
+                        <i class="bi bi-cash-coin me-2"></i>Farmer Payout Management
+                    </h1>
+                    <p class="dashboard-subtitle mb-0">Generate and manage payouts to dairy farmers</p>
+                </div>
+                <button class="btn btn-highland" onclick="openGeneratePayoutModal()">
+                    <i class="bi bi-plus-lg me-1"></i>New Payout
+                </button>
+            </div>
+
+            <!-- Payout Stats -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="card card-stat">
+                        <div class="card-body text-center">
+                            <h3 id="payoutDraftAmount">₱0</h3>
+                            <small class="text-muted">Draft Payouts</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card card-stat">
+                        <div class="card-body text-center">
+                            <h3 class="text-hf-primary" id="payoutApprovedAmount">₱0</h3>
+                            <small class="text-muted">Approved (Pending Payment)</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card card-stat">
+                        <div class="card-body text-center">
+                            <h3 id="payoutPaidAmount">₱0</h3>
+                            <small class="text-muted">Paid This Month</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suppliers Needing Payout -->
+            <div class="dashboard-section mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2" style="color: var(--hf-primary);"></i>Suppliers Needing Payout</h5>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="loadSuppliersNeedingPayout()">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-finance table-hover">
+                        <thead>
+                            <tr>
+                                <th>Supplier</th>
+                                <th>Contact</th>
+                                <th class="text-end">Collections</th>
+                                <th class="text-end">Total Liters</th>
+                                <th class="text-end">Est. Amount</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="suppliersNeedingPayoutBody">
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <i class="bi bi-check-circle fs-1 text-success"></i>
+                                    <p class="mt-2">All suppliers are up to date</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Payouts Table -->
+            <div class="dashboard-section">
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <select class="form-select form-select-sm" id="payoutStatusFilter" onchange="loadPayouts()">
+                            <option value="">All Status</option>
+                            <option value="Draft">Draft</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Paid">Paid</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select form-select-sm" id="payoutSupplierFilter" onchange="loadPayouts()">
+                            <option value="">All Suppliers</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-finance table-hover">
+                        <thead>
+                            <tr>
+                                <th>Reference</th>
+                                <th>Supplier</th>
+                                <th>Period</th>
+                                <th class="text-end">Liters</th>
+                                <th class="text-end">Gross</th>
+                                <th class="text-end">Deductions</th>
+                                <th class="text-end">Net Payable</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payoutsTableBody">
+                            <tr>
+                                <td colspan="9" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox fs-1"></i>
+                                    <p class="mt-2">No payouts found</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- FIFO Compliance Tab -->
+        <div id="fifoTab" class="tab-content" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="dashboard-title mb-2">
+                        <i class="bi bi-shield-check me-2"></i>FIFO Compliance Report
+                    </h1>
+                    <p class="dashboard-subtitle mb-0">Monitor and track First-In-First-Out inventory compliance</p>
+                </div>
+            </div>
+
+            <!-- FIFO Stats -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="card card-stat">
+                        <div class="card-body text-center">
+                            <h3 id="fifoTotalDispatches">0</h3>
+                            <small class="text-muted">Total Dispatches (30 days)</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card card-stat">
+                        <div class="card-body text-center">
+                            <h3 class="text-hf-primary" id="fifoCompliantCount">0</h3>
+                            <small class="text-muted">FIFO Compliant</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card card-stat">
+                        <div class="card-body text-center">
+                            <h3 id="fifoBypassCount">0</h3>
+                            <small class="text-muted">FIFO Bypassed</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card card-stat">
+                        <div class="card-body text-center">
+                            <h3 class="text-hf-primary" id="fifoCompliancePercent">100%</h3>
+                            <small class="text-muted">Compliance Rate</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FIFO Bypass Report -->
+            <div class="dashboard-section">
+                <h5 class="section-title">
+                    <i class="bi bi-exclamation-octagon" style="color: var(--hf-primary);"></i>
+                    FIFO Bypass Incidents
+                </h5>
+                <p class="text-muted small">Instances where newer batches were dispatched before older ones, potentially
+                    causing spoilage.</p>
+                <div class="table-responsive">
+                    <table class="table table-finance table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Product</th>
+                                <th>Batch Used</th>
+                                <th>Should Have Used</th>
+                                <th>Days Newer</th>
+                                <th>Order #</th>
+                                <th>Dispatched By</th>
+                                <th>Severity</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fifoBypassTableBody">
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-4">
+                                    <i class="bi bi-check-circle fs-1" style="color: var(--hf-primary);"></i>
+                                    <p class="mt-2">No FIFO bypass incidents found - Great job!</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Requisitions Approval Tab -->
+        <div id="requisitionsTab" class="tab-content" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="dashboard-title mb-2">
+                        <i class="bi bi-file-earmark-text me-2"></i>Purchase Requisition Approvals
+                    </h1>
+                    <p class="dashboard-subtitle mb-0">Review and approve purchase requisitions from warehouse</p>
+                </div>
+                <div>
+                    <select class="form-select d-inline-block w-auto me-2" id="requisitionStatusFilter"
+                        onchange="loadPendingRequisitions()">
+                        <option value="PENDING">Pending Approval</option>
+                        <option value="APPROVED">Approved</option>
+                        <option value="REJECTED">Rejected</option>
+                        <option value="">All Statuses</option>
+                    </select>
+                    <button class="btn btn-outline-highland" onclick="loadPendingRequisitions()">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Requisition Stats -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="card card-stat">
+                        <div class="card-body text-center">
+                            <h3 id="reqPendingCount">0</h3>
+                            <small class="text-muted">Pending Approval</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card card-stat">
+                        <div class="card-body text-center">
+                            <h3 id="reqApprovedCount">0</h3>
+                            <small class="text-muted">Approved (This Month)</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card card-stat">
+                        <div class="card-body text-center">
+                            <h3 id="reqRejectedCount">0</h3>
+                            <small class="text-muted">Rejected (This Month)</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card card-stat">
+                        <div class="card-body text-center">
+                            <h3 id="reqTotalEstCost">₱0</h3>
+                            <small class="text-muted">Pending Est. Cost</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Requisitions Table -->
+            <div class="dashboard-section">
+                <h5 class="section-title">
+                    <i class="bi bi-list-ul" style="color: var(--hf-primary);"></i>
+                    Requisitions Awaiting Action
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-finance table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Requisition #</th>
+                                <th>Request Date</th>
+                                <th>Requested By</th>
+                                <th>Items</th>
+                                <th>Est. Total</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="requisitionsTableBody">
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox fs-1"></i>
+                                    <p class="mt-2">Loading requisitions...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Requisition Detail Modal -->
+        <div class="modal fade" id="requisitionDetailModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header modal-header-highland">
+                        <h5 class="modal-title"><i class="bi bi-file-earmark-text me-2"></i>Requisition Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" id="requisitionDetailContent">
+                        <!-- Content loaded dynamically -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-danger" id="modalRejectBtn" onclick="showRejectModal()">
+                            <i class="bi bi-x-circle me-1"></i>Reject
+                        </button>
+                        <button type="button" class="btn btn-highland" id="modalApproveBtn"
+                            onclick="approveFromModal()">
+                            <i class="bi bi-check-circle me-1"></i>Approve
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rejection Reason Modal -->
+        <div class="modal fade" id="rejectReasonModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger bg-opacity-10">
+                        <h5 class="modal-title"><i class="bi bi-x-circle me-2"></i>Reject Requisition</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Reason for Rejection <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="rejectionReasonText" rows="3"
+                                placeholder="Please provide a reason for rejecting this requisition..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" onclick="confirmRejectRequisition()">
+                            <i class="bi bi-x-circle me-1"></i>Confirm Rejection
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accounts Receivable Tab -->
+        <div id="receivablesTab" class="tab-content" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="dashboard-title mb-2">
+                        <i class="bi bi-receipt-cutoff me-2"></i>Accounts Receivable
+                    </h1>
+                    <p class="dashboard-subtitle mb-0">Track and collect payments from mall credit orders</p>
+                </div>
+                <div>
+                    <button class="btn btn-outline-highland" onclick="loadReceivables()">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- AR Stats -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="card card-stat">
+                        <div class="card-body text-center">
+                            <h3 id="arTotalUnpaid">₱0</h3>
+                            <small class="text-muted">Total Unpaid</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card card-stat">
+                        <div class="card-body text-center">
+                            <h3 id="arOverdueAmount">₱0</h3>
+                            <small class="text-muted">Overdue Amount</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card card-stat">
+                        <div class="card-body text-center">
+                            <h3 id="arOverdueCount">0</h3>
+                            <small class="text-muted">Overdue Orders</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card card-stat">
+                        <div class="card-body text-center">
+                            <h3 class="text-hf-primary" id="arCollectedThisMonth">₱0</h3>
+                            <small class="text-muted">Collected This Month</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Unpaid Orders Table -->
+            <div class="dashboard-section">
+                <h5 class="section-title">
+                    <i class="bi bi-hourglass-split" style="color: var(--hf-primary);"></i>
+                    Unpaid Credit Orders (Mall Charge Invoices)
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-finance table-hover">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Customer</th>
+                                <th>Order Date</th>
+                                <th>Due Date</th>
+                                <th>Days Overdue</th>
+                                <th class="text-end">Total</th>
+                                <th class="text-end">Paid</th>
+                                <th class="text-end">Balance</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="arUnpaidTableBody">
+                            <tr>
+                                <td colspan="10" class="text-center text-muted py-4">
+                                    <i class="bi bi-check-circle fs-1" style="color: var(--hf-primary);"></i>
+                                    <p class="mt-2">No unpaid orders - All accounts collected!</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cost Alerts Tab (BOM Engine Notifications) -->
+        <div id="alertsTab" class="tab-content" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="dashboard-title mb-2">
+                        <i class="bi bi-bell me-2"></i>Cost Alerts
+                    </h1>
+                    <p class="dashboard-subtitle mb-0">Material price changes affecting product costs (BOM Engine)</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-highland" onclick="markAllNotificationsRead()">
+                        <i class="bi bi-check2-all me-1"></i>Mark All Read
+                    </button>
+                    <button class="btn btn-outline-highland" onclick="loadNotifications()">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Alerts Stats -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="card card-stat">
+                        <div class="card-body text-center">
+                            <h3 id="alertsUnreadCount">0</h3>
+                            <small class="text-muted">Unread Alerts</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card card-stat">
+                        <div class="card-body text-center">
+                            <h3 id="alertsTotalCount">0</h3>
+                            <small class="text-muted">Total Alerts</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card card-stat">
+                        <div class="card-body text-center">
+                            <h3 class="text-hf-primary" id="alertsReadCount">0</h3>
+                            <small class="text-muted">Reviewed</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications List -->
+            <div class="dashboard-section">
+                <h5 class="section-title">
+                    <i class="bi bi-graph-up-arrow" style="color: var(--hf-primary);"></i>
+                    Price Change Notifications
+                </h5>
+                <div id="notificationsList">
+                    <div class="text-center text-muted py-5">
+                        <i class="bi bi-bell-slash fs-1"></i>
+                        <p class="mt-2">No cost alerts at this time.</p>
+                        <small>Alerts appear when material prices change significantly (≥5% or ≥₱2)</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Production Cost Approvals Tab -->
+        <div id="approvalsTab" class="tab-content" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="dashboard-title mb-2">
+                        <i class="bi bi-clipboard-check me-2"></i>Production Cost Approvals
+                    </h1>
+                    <p class="text-muted mb-0">
+                        Review and approve production requests that exceed cost thresholds
+                    </p>
+                </div>
+                <button class="btn btn-outline-primary" onclick="loadPendingCostApprovals()">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                </button>
+            </div>
+            
+            <div class="dashboard-section">
+                <div id="approvalsContent">
+                    <div class="text-center text-muted py-5">
+                        <i class="bi bi-hourglass-split fs-1"></i>
+                        <p class="mt-2">Loading pending approvals...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Master Recipe Management Tab -->
+        <div id="recipesTab" class="tab-content" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="dashboard-title mb-2">
+                        <i class="bi bi-journal-bookmark me-2"></i>Master Recipe Management
+                    </h1>
+                    <p class="dashboard-subtitle mb-0">Set production ratios for each product (BOM Engine)</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-highland" onclick="loadRecipes()">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Recipe Explanation Card -->
+            <div class="alert alert-info mb-4">
+                <h6 class="alert-heading"><i class="bi bi-info-circle me-1"></i>How Master Recipes Work</h6>
+                <p class="mb-2">
+                    <strong>Ratio</strong> = Fixed quantity of raw material needed per 1 unit of finished product.<br>
+                    <strong>Example:</strong> If ratio is 0.5L milk per 500ml bottle, the flavor stays consistent regardless of price changes.
+                </p>
+                <hr>
+                <p class="mb-0 small">
+                    <strong>BOM Engine Calculation:</strong><br>
+                    <code>Ratio (0.5L) × Current Price (₱25/L) = Material Cost (₱12.50)</code><br>
+                    Finance sets ratios → Warehouse inputs prices → System calculates batch cost automatically.
+                </p>
+            </div>
+
+            <!-- Recipes Table -->
+            <div class="dashboard-section">
+                <h5 class="section-title">
+                    <i class="bi bi-list-ul text-hf-primary"></i>
+                    Product Recipes
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-finance">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;">ID</th>
+                                <th style="width: 25%;">Product</th>
+                                <th style="width: 15%;">Batch Yield</th>
+                                <th style="width: 35%;">Ingredients</th>
+                                <th style="width: 10%;">Est. Cost</th>
+                                <th style="width: 10%;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recipesTableBody">
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                    Loading recipes...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Raw Material Prices Reference -->
+            <div class="dashboard-section">
+                <h5 class="section-title">
+                    <i class="bi bi-tags" style="color: var(--hf-primary);"></i>
+                    Current Raw Material Prices (from Warehouse)
+                </h5>
+                <div class="row g-2" id="materialPricesGrid">
+                    <div class="col-12 text-center text-muted py-3">
+                        <small>Loading material prices...</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Recipe Modal -->
+    <div class="modal fade" id="editRecipeModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header modal-header-highland">
+                    <h5 class="modal-title">
+                        <i class="bi bi-pencil-square me-2"></i>Edit Recipe Ratios
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editRecipeId">
+                    
+                    <div class="mb-4">
+                        <h6 id="editRecipeProductName" class="text-hf-primary"></h6>
+                        <small class="text-muted" id="editRecipeDescription"></small>
+                    </div>
+
+                    <div class="alert alert-warning small mb-3">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        <strong>Important:</strong> Changing ratios affects all future production batches. 
+                        Only modify if product formula has officially changed.
+                    </div>
+
+                    <!-- Current Ingredients -->
+                    <h6 class="mb-3">Ingredients (Ratio per 1 unit)</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Raw Material</th>
+                                    <th style="width: 120px;">Ratio</th>
+                                    <th style="width: 80px;">Unit</th>
+                                    <th style="width: 100px;">Current Price</th>
+                                    <th style="width: 100px;">Cost/Unit</th>
+                                    <th style="width: 50px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="recipeIngredientsBody">
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-success">
+                                    <td colspan="4" class="text-end fw-bold">Total Material Cost per Unit:</td>
+                                    <td class="fw-bold" id="totalMaterialCost">₱0.00</td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <!-- Add Ingredient -->
+                    <div class="border rounded p-3 mt-3 bg-light">
+                        <h6 class="mb-3"><i class="bi bi-plus-circle me-1"></i>Add Ingredient</h6>
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-5">
+                                <label class="form-label small">Raw Material</label>
+                                <select class="form-select form-select-sm" id="newIngredientMaterial">
+                                    <option value="">Select material...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small">Ratio (qty per unit)</label>
+                                <input type="number" class="form-control form-control-sm" id="newIngredientRatio" 
+                                       step="0.001" min="0.001" placeholder="e.g., 0.5">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small">Unit</label>
+                                <input type="text" class="form-control form-control-sm" id="newIngredientUnit" 
+                                       readonly placeholder="Auto">
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-highland btn-sm w-100" onclick="addRecipeIngredient()">
+                                    <i class="bi bi-plus"></i> Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-highland" data-bs-dismiss="modal">
+                        <i class="bi bi-check-lg me-1"></i>Done
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Record Payment Modal -->
+    <div class="modal fade" id="recordPaymentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-highland">
+                    <h5 class="modal-title">
+                        <i class="bi bi-cash me-2"></i>Record Payment
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="recordPaymentForm">
+                        <input type="hidden" id="paymentSaleId">
+                        <div class="mb-3">
+                            <label class="form-label">Order Number</label>
+                            <input type="text" class="form-control" id="paymentOrderNumber" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Customer</label>
+                            <input type="text" class="form-control" id="paymentCustomerName" readonly>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label">Total Amount</label>
+                                <input type="text" class="form-control" id="paymentTotalAmount" readonly>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Balance Due</label>
+                                <input type="text" class="form-control text-danger fw-bold" id="paymentBalanceDue"
+                                    readonly>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Amount Received <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="paymentAmountReceived" step="0.01" min="0.01"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Payment Method <span class="text-danger">*</span></label>
+                            <select class="form-select" id="paymentMethodSelect" required>
+                                <option value="">Select method...</option>
+                                <option value="1">Cash</option>
+                                <option value="2">Bank Transfer</option>
+                                <option value="3">Check</option>
+                                <option value="4">GCash</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Reference Number</label>
+                            <input type="text" class="form-control" id="paymentReferenceNumber"
+                                placeholder="Check #, OR #, etc.">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-control" id="paymentNotes" rows="2"
+                                placeholder="Optional notes..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-highland" onclick="submitPayment()">
+                        <i class="bi bi-check-lg me-1"></i>Record Payment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generate Payout Modal -->
+    <div class="modal fade" id="generatePayoutModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header modal-header-highland">
+                    <h5 class="modal-title">
+                        <i class="bi bi-cash-coin me-2"></i>Generate Farmer Payout
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="generatePayoutForm">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label">Dairy Cooperative/Farmer</label>
+                                <select class="form-select" id="payoutSupplier" required>
+                                    <option value="">Select Supplier...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Period Start</label>
+                                <input type="date" class="form-control" id="payoutPeriodStart" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Period End</label>
+                                <input type="date" class="form-control" id="payoutPeriodEnd" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Price per Liter (₱)</label>
+                                <input type="number" class="form-control" id="payoutPricePerLiter" value="40.00"
+                                    step="0.01" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Transport Deduction (₱)</label>
+                                <input type="number" class="form-control" id="payoutTransportDeduction" value="0.00"
+                                    step="0.01">
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <button type="button" class="btn btn-outline-highland" onclick="previewPayout()">
+                                <i class="bi bi-eye me-1"></i>Preview Collections
+                            </button>
+                        </div>
+                        <!-- Preview Section -->
+                        <div id="payoutPreviewSection" class="mt-3" style="display: none;">
+                            <hr>
+                            <h6>Collection Summary</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <tbody id="payoutPreviewBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-highland" onclick="generatePayout()" id="createPayoutBtn" disabled>
+                        <i class="bi bi-file-earmark-plus me-1"></i>Create Draft Payout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Process Payment Modal -->
+    <div class="modal fade" id="processPaymentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success bg-opacity-10">
+                    <h5 class="modal-title text-success">
+                        <i class="bi bi-bank me-2"></i>Process Payment
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="processPaymentId">
+                    <div class="alert alert-info">
+                        <div class="d-flex justify-content-between">
+                            <span>Supplier:</span>
+                            <strong id="paymentSupplierName">-</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Amount to Pay:</span>
+                            <strong class="text-success" id="paymentAmount">₱0.00</strong>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Payment Method</label>
+                        <select class="form-select" id="paymentMethod" required>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="Check">Check</option>
+                            <option value="Cash">Cash</option>
+                            <option value="GCash">GCash</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Reference Number</label>
+                        <input type="text" class="form-control" id="paymentReference" placeholder="e.g., Check #12345 or Transfer Ref">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Payment Date</label>
+                        <input type="date" class="form-control" id="paymentDate" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notes (Optional)</label>
+                        <textarea class="form-control" id="paymentNotes" rows="2" placeholder="Any additional notes..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="confirmProcessPayment()">
+                        <i class="bi bi-check-lg me-1"></i>Confirm Payment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Record Spoilage Modal -->
+    <div class="modal fade" id="recordSpoilageModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger bg-opacity-10">
+                    <h5 class="modal-title text-danger">
+                        <i class="bi bi-trash me-2"></i>Record Spoilage
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="recordSpoilageForm">
+                        <input type="hidden" id="spoilageBatchId">
+                        <div class="mb-3">
+                            <label class="form-label">Batch Number</label>
+                            <input type="text" class="form-control" id="spoilageBatchNumber" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Product</label>
+                            <input type="text" class="form-control" id="spoilageProductName" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Spoilage Type</label>
+                            <select class="form-select" id="spoilageType" required>
+                                <option value="EXPIRED">Expired</option>
+                                <option value="DAMAGED">Damaged</option>
+                                <option value="CONTAMINATED">Contaminated</option>
+                                <option value="QUALITY_REJECT">Quality Reject</option>
+                                <option value="FIFO_BYPASS">FIFO Bypass Loss</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Quantity to Write Off</label>
+                            <input type="number" class="form-control" id="spoilageQuantity" required>
+                            <small class="text-muted">Available: <span id="spoilageAvailableQty">0</span></small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Reason/Notes</label>
+                            <textarea class="form-control" id="spoilageReason" rows="3"
+                                placeholder="Describe the reason for spoilage..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="submitSpoilage()">
+                        <i class="bi bi-trash me-1"></i>Record Spoilage
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payout Details Modal -->
+    <div class="modal fade" id="payoutDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header modal-header-highland">
+                    <h5 class="modal-title">
+                        <i class="bi bi-receipt me-2"></i>Payout Details
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="payoutDetailsBody">
+                    <!-- Content loaded dynamically -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-highland" onclick="printPayoutDetails()">
+                        <i class="bi bi-printer me-1"></i>Print
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="../js/api-handler.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/finance-dashboard.js"></script>
+</body>
+
+</html>

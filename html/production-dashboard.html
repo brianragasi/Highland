@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Highland Fresh - Production Supervisor Dashboard</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Highland Fresh Theme -->
+    <link rel="stylesheet" href="../css/styles.css">
+
+    <!-- JsBarcode Library for scannable barcode generation -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
+    <!-- Highland Fresh Production Dashboard Styles -->
+    <style>
+        .navbar-custom {
+            background: linear-gradient(135deg, var(--hf-primary) 0%, var(--hf-primary-hover) 100%);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            color: white !important;
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            background: var(--hf-primary-light);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            color: var(--hf-primary);
+        }
+
+        .btn-highland {
+            background: var(--hf-primary);
+            border-color: var(--hf-primary);
+            color: white;
+        }
+
+        .btn-highland:hover {
+            background: var(--hf-primary-hover);
+            border-color: var(--hf-primary-hover);
+            color: white;
+        }
+
+        .btn-highland-outline,
+        .btn-outline-highland {
+            border: 2px solid var(--hf-primary);
+            color: var(--hf-primary);
+            background: transparent;
+        }
+
+        .btn-highland-outline:hover,
+        .btn-outline-highland:hover {
+            background: var(--hf-primary);
+            color: white;
+        }
+
+        .text-highland-primary {
+            color: var(--hf-primary) !important;
+        }
+
+        .status-badge {
+            font-size: 0.8em;
+            padding: 0.4em 0.8em;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .status-planned {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status-in-progress {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .status-quality-control {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .status-completed {
+            background: var(--hf-primary-light);
+            color: var(--hf-primary);
+        }
+
+        .status-failed {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, var(--hf-primary-light) 0%, white 100%);
+            border-left: 4px solid var(--hf-primary);
+        }
+
+        .recipe-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .recipe-card:hover {
+            border-color: var(--border-color);
+            background-color: var(--hf-primary-light);
+        }
+
+        .recipe-card.selected {
+            border-color: var(--hf-primary);
+            background-color: var(--hf-primary-light);
+        }
+
+        .batch-timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .batch-timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border-color);
+        }
+
+        .batch-step {
+            position: relative;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--surface-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .batch-step::before {
+            content: '';
+            position: absolute;
+            left: -25px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--hf-primary);
+            border: 3px solid white;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .spinner-custom {
+            border: 4px solid var(--hf-primary-light);
+            border-top: 4px solid var(--hf-primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .tab-content {
+            background: var(--surface-color);
+            border-radius: 0 8px 8px 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .nav-tabs .nav-link {
+            color: var(--hf-primary);
+            border: none;
+            border-radius: 8px 8px 0 0;
+            margin-right: 5px;
+        }
+
+        .nav-tabs .nav-link.active {
+            background: var(--hf-primary);
+            color: white;
+        }
+
+        .bg-highland-primary {
+            background-color: var(--hf-primary) !important;
+        }
+
+        /* Enhanced Dashboard Card Styles */
+        .feature-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--hf-primary), var(--hf-primary-hover));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-color: var(--hf-primary);
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-card:active {
+            transform: translateY(-2px) scale(0.98);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1);
+        }
+
+        .feature-card h5 {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            transition: color 0.3s ease;
+        }
+
+        .feature-card:hover h5 {
+            color: var(--hf-primary);
+        }
+
+        .feature-card p {
+            color: #6c757d;
+            margin-bottom: 0;
+            transition: color 0.3s ease;
+        }
+
+        .feature-card:hover p {
+            color: #5a6c7d;
+        }
+
+        /* Main Card Styles */
+        .main-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #f0f0f0;
+        }
+
+        .card-title {
+            color: #2c3e50;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        /* Statistics Styles */
+        .stat-item {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--hf-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Loading States */
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--hf-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Hover effects for better user feedback */
+        .clickable {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .clickable:hover {
+            opacity: 0.9;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .feature-card {
+                padding: 1.5rem;
+                margin-bottom: 1rem;
+            }
+
+            .feature-icon {
+                font-size: 2.5rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .main-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="production-dashboard.html">
+                <img src="../images/highland_fresh_logo.jpg" alt="Highland Fresh Logo" class="navbar-logo">
+                Highland Fresh
+            </a>
+            <div class="navbar-nav ms-auto d-flex align-items-center">
+                <span class="navbar-text me-3">
+                    <i class="bi bi-gear-fill me-1"></i>Production Supervisor
+                </span>
+                <a href="production-dashboard.html" class="btn btn-outline-secondary btn-sm me-2">
+                    <i class="bi bi-grid me-1"></i>Dashboard
+                </a>
+                <button class="btn btn-outline-danger btn-sm" onclick="handleLogout()">
+                    <i class="bi bi-box-arrow-left"></i> Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="text-center">
+            <div class="spinner-custom"></div>
+            <p class="text-white mt-3" id="loadingText">Loading...</p>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="main-card">
+                    <h2 class="card-title">Production Dashboard</h2>
+
+                    <!-- Production Stats - Simplified -->
+                    <div class="row text-center mb-4">
+                        <div class="col-md-4 col-sm-6 mb-3">
+                            <div class="stat-item">
+                                <div class="stat-number" id="activeBatchesCount">0</div>
+                                <div class="stat-label">Active Batches</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6 mb-3">
+                            <div class="stat-item">
+                                <div class="stat-number" id="completedBatchesCount">0</div>
+                                <div class="stat-label">Completed Today</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6 mb-3">
+                            <div class="stat-item">
+                                <div class="stat-number" id="totalProductionCount">0</div>
+                                <div class="stat-label">Total Production</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Production Actions - Simplified to Core Features -->
+                    <div class="row g-4">
+                        <div class="col-lg-4 col-md-6">
+                            <div class="feature-card h-100" onclick="createBatch()">
+                                <i class="bi bi-plus-circle feature-icon text-success"></i>
+                                <h5>Create Production Batch</h5>
+                                <p>Issue raw materials and record production output</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="feature-card h-100" onclick="viewBatches()">
+                                <i class="bi bi-list-check feature-icon text-primary"></i>
+                                <h5>View Production Batches</h5>
+                                <p>Monitor all active and completed production batches</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="feature-card h-100" onclick="viewRawMaterials()">
+                                <i class="bi bi-box-seam feature-icon text-info"></i>
+                                <h5>View Raw Materials</h5>
+                                <p>View current raw materials inventory (read-only)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Raw Milk Inventory Section -->
+                <div class="main-card mt-4">
+                    <div class="card-title">
+                        <i class="bi bi-droplet-half"></i> Raw Milk Inventory
+                        <span class="badge bg-highland-primary ms-2" id="availableMilkBadge">0</span>
+                    </div>
+                    <p class="text-muted small mb-3">
+                        <i class="bi bi-info-circle"></i>
+                        Raw Milk batches available for production. System uses <strong>FIFO</strong> (First In, First
+                        Out) - oldest batches are allocated first. Raw milk expires 48 hours after collection.
+                    </p>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm" id="availableMilkTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Batch Code</th>
+                                    <th>Supplier</th>
+                                    <th>Received</th>
+                                    <th>Available (L)</th>
+                                    <th>Age</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="availableMilkTableBody">
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted py-3">
+                                        <i class="bi bi-hourglass-split fs-3 d-block mb-2"></i>
+                                        Loading Raw Milk inventory...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Active Production Batches - Simplified View -->
+                <div class="main-card mt-4">
+                    <div class="card-title">
+                        <i class="bi bi-list-check"></i> Active Production Batches
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <select class="form-select d-inline-block w-auto me-2" id="batchStatusFilter">
+                                <option value="">All Batches</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                            <button class="btn btn-highland btn-sm" onclick="loadProductionBatches()">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh
+                            </button>
+                        </div>
+                        <button class="btn btn-highland" onclick="showCreateBatchModal()">
+                            <i class="bi bi-plus-circle"></i> Create Production Batch
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="batchesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Batch Number</th>
+                                            <th>Product</th>
+                                            <th>Quantity</th>
+                                            <th>Status</th>
+                                            <th>Started</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="batchesTableBody">
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted py-4">
+                                                <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                                                No production batches found. Create a new batch to get started.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Production Batch Modal -->
+    <div class="modal fade" id="createBatchModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-highland-primary text-white">
+                    <h5 class="modal-title"><i class="bi bi-plus-circle"></i> Create Production Batch</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createBatchForm">
+                        <!-- Step 1: Select Finished Product and Quantity -->
+                        <div class="mb-4">
+                            <h6 class="text-highland-primary mb-3">
+                                <i class="bi bi-box-seam"></i> Step 1: Select Product & Quantity
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-7 mb-3">
+                                    <label class="form-label">Finished Product *</label>
+                                    <select class="form-select" id="batchFinishedProduct" required onchange="loadRecipeRequirements()">
+                                        <option value="">Select finished product...</option>
+                                    </select>
+                                    <small class="text-muted">Recipe is pre-defined by Finance. Materials auto-calculated.</small>
+                                </div>
+                                <div class="col-md-5 mb-3">
+                                    <label class="form-label">Quantity to Produce *</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="batchPlannedQuantity" step="1" min="1"
+                                            required oninput="calculateMaterialsNeeded()">
+                                        <span class="input-group-text" id="productUnitLabel">units</span>
+                                    </div>
+                                    <small class="text-muted">System will multiply recipe ratios</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Auto-Calculated Materials (READ-ONLY - Based on Master Recipe) -->
+                        <div class="mb-4">
+                            <h6 class="text-highland-primary mb-3">
+                                <i class="bi bi-calculator"></i> Step 2: Materials Required (Auto-Calculated)
+                            </h6>
+                            <div class="alert alert-info mb-3">
+                                <i class="bi bi-lock-fill me-2"></i>
+                                <strong>Recipe-Driven:</strong> Materials are calculated from the Master Recipe set by Finance.
+                                You cannot modify the recipe - only the quantity to produce.
+                            </div>
+                            
+                            <!-- Recipe Materials Display (Read-Only) -->
+                            <div id="recipeMaterialsSection" class="d-none">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Raw Material</th>
+                                                <th class="text-center">Per Unit</th>
+                                                <th class="text-center">Total Needed</th>
+                                                <th class="text-center">Available</th>
+                                                <th class="text-center">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="recipeMaterialsTableBody">
+                                            <!-- Auto-populated from recipe -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-outline-success btn-sm" onclick="previewFifoBatches()">
+                                        <i class="bi bi-eye me-1"></i>Preview FIFO Batch Allocation
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- No Recipe Selected Message -->
+                            <div id="noRecipeMessage" class="text-center text-muted py-4">
+                                <i class="bi bi-clipboard-data fs-2 d-block mb-2"></i>
+                                Select a product above to see required materials.
+                            </div>
+                            
+                            <!-- FIFO Preview Section -->
+                            <div id="fifoPreviewSection" class="d-none mt-3">
+                                <div class="card border-success">
+                                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                                        <span><i class="bi bi-list-check"></i> FIFO Batch Allocation Preview</span>
+                                        <button type="button" class="btn btn-sm btn-outline-light" onclick="hideFifoPreview()">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </div>
+                                    <div class="card-body" id="fifoPreviewContent">
+                                        <!-- FIFO preview will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Production Details -->
+                        <div class="mb-3">
+                            <h6 class="text-highland-primary mb-3">
+                                <i class="bi bi-person-badge"></i> Step 3: Production Details
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Operator/Supervisor Name *</label>
+                                    <input type="text" class="form-control" id="operatorName" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Production Date *</label>
+                                    <input type="date" class="form-control" id="productionDate" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Production Notes (Optional)</label>
+                                <textarea class="form-control" id="productionNotes" rows="2"
+                                    placeholder="Any observations or issues during production..."></textarea>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Insufficient Stock Warning -->
+                    <div id="materialWarning" class="alert alert-danger d-none">
+                        <i class="bi bi-exclamation-octagon"></i> <strong>Insufficient Stock!</strong>
+                        <span id="materialWarningText">Some materials don't have enough stock to complete this batch.</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-highland" id="createBatchBtn" onclick="issueMaterialsAndCreateBatch()" disabled>
+                        <i class="bi bi-check-circle"></i> Start Production Batch
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Batch Details Modal -->
+    <div class="modal fade" id="batchDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-highland-primary text-white">
+                    <h5 class="modal-title"><i class="bi bi-info-circle"></i> Production Batch Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="batchDetailsContent">
+                        <!-- Batch details will be loaded here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <div id="batchActionButtons">
+                        <!-- Action buttons will be added based on batch status -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+    <script src="../js/api-handler.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/user-display-utils.js"></script>
+    <script src="../js/common/HighlandFreshPageUtils.js"></script>
+    <script src="../js/production/ProductionDashboard.js"></script>
+    <script src="../js/production/ProductionDashboardPageInit.js"></script>
+
+    <!-- Record Production Output Modal (Complete Batch) -->
+    <div class="modal fade" id="completeBatchModal" tabindex="-1" aria-labelledby="completeBatchModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="completeBatchModalLabel">
+                        <i class="bi bi-check-circle"></i> Record Production Output
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Step 4:</strong> Record the finished goods produced.
+                        This will increase the Finished Goods Inventory and generate a unique batch code for
+                        traceability.
+                    </div>
+                    <form id="completeBatchForm">
+                        <!-- Batch Materials Used (FIFO Traceability - Gap 2-GAP-3) -->
+                        <div class="mb-3" id="batchMaterialsUsedSection">
+                            <label class="form-label"><i class="bi bi-box-seam"></i> Raw Materials Consumed
+                                (FIFO)</label>
+                            <div id="batchMaterialsUsedList" class="border rounded p-2 bg-light"
+                                style="max-height: 150px; overflow-y: auto;">
+                                <small class="text-muted">Loading materials used...</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="yieldQuantity" class="form-label">
+                                Quantity Produced <span class="text-danger">*</span>
+                            </label>
+                            <input type="number" class="form-control" id="yieldQuantity" step="1" min="1" required>
+                            <div class="form-text">Enter the total units of finished product produced (e.g., 500
+                                bottles)</div>
+                        </div>
+
+                        <!-- Wastage Section with Batch Linkage (Gaps 2-GAP-3 and 2-GAP-4) -->
+                        <div class="mb-3 p-3 border rounded bg-light">
+                            <h6 class="text-danger mb-3"><i class="bi bi-exclamation-triangle"></i> Wastage/Spoilage
+                                Reporting</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="wasteQuantity" class="form-label">Waste Quantity</label>
+                                    <input type="number" class="form-control" id="wasteQuantity" step="0.01" min="0"
+                                        value="0" onchange="toggleWasteReason()">
+                                    <div class="form-text">Units wasted/spoiled during production</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="wasteReason" class="form-label">Waste Reason <span
+                                            id="wasteReasonRequired" class="text-danger d-none">*</span></label>
+                                    <select class="form-select" id="wasteReason" disabled>
+                                        <option value="">Select reason...</option>
+                                        <option value="SPILLAGE">Spillage during handling</option>
+                                        <option value="CONTAMINATION">Contamination detected</option>
+                                        <option value="EQUIPMENT_FAILURE">Equipment failure</option>
+                                        <option value="QUALITY_REJECT">Quality rejection</option>
+                                        <option value="EXPIRED_MATERIAL">Expired raw material</option>
+                                        <option value="PROCESS_ERROR">Process/operator error</option>
+                                        <option value="OTHER">Other (specify in notes)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mt-2" id="wasteBatchLinkSection" style="display: none;">
+                                <label class="form-label">Wastage linked to batches:</label>
+                                <div id="wasteBatchList" class="small text-muted">
+                                    Wastage will be deducted from oldest batches (FIFO)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="qualityNotes" class="form-label">Quality/Production Notes</label>
+                            <textarea class="form-control" id="qualityNotes" rows="3"
+                                placeholder="Optional: Quality observations, production conditions, issues encountered..."></textarea>
+                        </div>
+                        <div class="alert alert-success">
+                            <i class="bi bi-qr-code"></i>
+                            <strong>System will generate:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Unique batch code (e.g., PROD-20251022-001)</li>
+                                <li>Expiry date (Production + 7 days)</li>
+                                <li>Printable batch label with barcode</li>
+                                <li>Full traceability to raw material batches</li>
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" id="completeBatchBtn">
+                        <i class="bi bi-check-circle"></i> Record Output & Complete Batch
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start Batch Confirmation Modal -->
+    <div class="modal fade" id="startBatchModal" tabindex="-1" aria-labelledby="startBatchModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="startBatchModalLabel">Confirm Production Start</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-exclamation-triangle-fill text-warning me-3" style="font-size: 2rem;"></i>
+                        <div>
+                            <h6 class="mb-1">Start Production Batch</h6>
+                            <p class="text-muted mb-0">This will begin the production process and reserve the required
+                                raw materials from inventory.</p>
+                        </div>
+                    </div>
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> Once started, the batch cannot be cancelled. Make sure all preparations
+                        are complete.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" id="confirmStartBatchBtn">
+                        <i class="bi bi-play-fill me-2"></i>Start Production
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-box-arrow-right text-primary me-3" style="font-size: 2rem;"></i>
+                        <div>
+                            <h6 class="mb-1">Logout from Highland Fresh</h6>
+                            <p class="text-muted mb-0">You will be redirected to the login page. Any unsaved changes
+                                will be lost.</p>
+                        </div>
+                    </div>
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> Make sure to save any important work before logging out.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmLogoutBtn">
+                        <i class="bi bi-box-arrow-right me-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DEPRECATED: Material Row Template - No longer used with Master Recipe flow
+         Finance Officer sets recipes, Production just follows.
+         Materials are auto-calculated based on recipe × quantity.
+         Keeping for backward compatibility but not rendered in new modal. -->
+    <template id="materialRowTemplate">
+        <div class="material-row mb-3 p-3 border rounded bg-light">
+            <div class="row g-2 align-items-center">
+                <!-- Material Selection (5 columns) -->
+                <div class="col-md-5">
+                    <label class="form-label small mb-1">Raw Material *</label>
+                    <select class="form-select form-select-sm material-select" required>
+                        <option value="">Select material...</option>
+                    </select>
+                </div>
+
+                <!-- Quantity with Unit (4 columns) -->
+                <div class="col-md-4">
+                    <label class="form-label small mb-1">Qty to Issue *</label>
+                    <div class="input-group input-group-sm">
+                        <input type="number" class="form-control material-quantity" step="0.001" min="0.001" required
+                            placeholder="0.00">
+                        <span class="input-group-text material-unit">Unit</span>
+                    </div>
+                </div>
+
+                <!-- Remove Button (3 columns) -->
+                <div class="col-md-3 text-end">
+                    <label class="form-label small mb-1 d-none d-md-block">&nbsp;</label>
+                    <button type="button" class="btn btn-outline-danger btn-sm remove-material-btn">
+                        <i class="bi bi-trash me-1"></i>Remove
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stock Availability Info -->
+            <div class="row mt-2">
+                <div class="col-12">
+                    <small class="text-info">
+                        <i class="bi bi-box-seam me-1"></i>Stock:
+                        <strong class="available-quantity">-</strong>
+                        <span class="material-unit-text"></span>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Print Batch Label Modal (Gap 2-GAP-2 Fix) -->
+    <div class="modal fade" id="printLabelModal" tabindex="-1" aria-labelledby="printLabelModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-highland-primary text-white">
+                    <h5 class="modal-title" id="printLabelModalLabel">
+                        <i class="bi bi-printer"></i> Print Batch Label
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <!-- Label Preview -->
+                            <div id="labelPreview" class="border border-dark p-3"
+                                style="background: white; min-height: 200px;">
+                                <div class="text-center">
+                                    <h5 class="mb-1"><strong>HIGHLAND FRESH</strong></h5>
+                                    <hr class="my-2">
+                                    <h6 id="labelProductName" class="mb-2">Product Name</h6>
+                                    <div class="border border-dark p-2 mb-2" style="background: #f8f9fa;">
+                                        <strong>Batch:</strong> <span id="labelBatchCode">BATCH-XXXXXXXX-XXXX</span>
+                                    </div>
+                                    <div class="row text-start small">
+                                        <div class="col-6">
+                                            <strong>Prod Date:</strong><br>
+                                            <span id="labelProdDate">-</span>
+                                        </div>
+                                        <div class="col-6">
+                                            <strong class="text-danger">Expiry:</strong><br>
+                                            <span id="labelExpiryDate" class="text-danger">-</span>
+                                        </div>
+                                    </div>
+                                    <hr class="my-2">
+                                    <!-- Real SVG Barcode (scannable) -->
+                                    <div class="text-center" id="labelBarcodeContainer"
+                                        style="max-width: 100%; overflow: hidden;">
+                                        <svg id="labelBarcodeSvg" style="max-width: 100%; height: auto;"></svg>
+                                    </div>
+                                    <small class="text-muted" id="labelBatchCodeSmall">BATCH-XXXXXXXX-XXXX</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Print Options -->
+                            <h6><i class="bi bi-gear"></i> Print Options</h6>
+                            <div class="mb-3">
+                                <label class="form-label">Number of Labels</label>
+                                <input type="number" class="form-control" id="labelQuantity" value="1" min="1"
+                                    max="100">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Label Size</label>
+                                <select class="form-select" id="labelSize">
+                                    <option value="small">Small (2" x 1")</option>
+                                    <option value="medium" selected>Medium (3" x 2")</option>
+                                    <option value="large">Large (4" x 3")</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="includeIngredients">
+                                    <label class="form-check-label" for="includeIngredients">
+                                        Include raw material batches used
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i>
+                                <strong>Traceability:</strong> This label links to:
+                                <ul class="mb-0 mt-1 small">
+                                    <li id="labelRawMaterialCount">0 raw material batches</li>
+                                    <li>Production date & operator</li>
+                                    <li>Quality control records</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-primary" onclick="downloadLabelPDF()">
+                        <i class="bi bi-download"></i> Download PDF
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="printBatchLabel()">
+                        <i class="bi bi-printer"></i> Print Label
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

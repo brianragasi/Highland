@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Highland Fresh - Transaction History</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="../css/styles.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+</head>
+<body>
+    
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="admin-dashboard.html">
+                <img src="../images/highland_fresh_logo.jpg" alt="Highland Fresh Logo" class="navbar-logo">
+                Highland Fresh - Reports
+            </a>
+            <div class="navbar-nav ms-auto d-flex align-items-center">
+                <span class="navbar-text me-3" id="userWelcome">
+                    <i class="bi bi-person-circle me-1"></i>Welcome, <span id="currentUser">User</span>!
+                </span>
+                <a href="admin-dashboard.html" class="btn btn-outline-secondary btn-sm me-2">
+                    <i class="bi bi-grid me-1"></i>Dashboard
+                </a>
+                <button class="btn btn-outline-danger btn-sm">
+                    <i class="bi bi-box-arrow-right me-1"></i>Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+    <div class="container mt-4 mb-5">
+        <div class="row mb-4">
+            <div class="col-12">
+                
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 class="dashboard-title mb-2">
+                            <i class="bi bi-graph-up me-2"></i>Transaction History
+                        </h1>
+                        <p class="dashboard-subtitle mb-0">
+                            <i class="bi bi-building me-1"></i>
+                            Highland Fresh Dairy Sales & Business Intelligence
+                        </p>
+                    </div>
+                    <button class="btn btn-feature">
+                        <i class="bi bi-arrow-repeat me-1"></i>Refresh Data
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card main-card">
+                    <div class="card-body">
+                        <h6 class="mb-3 d-flex align-items-center justify-content-between" style="color: var(--hf-primary); font-weight: 600;">
+                            <span>
+                                <i class="bi bi-funnel me-2"></i>Highland Fresh Transaction Filters
+                            </span>
+                            <span class="badge bg-secondary d-none" id="activeFiltersCount">0 filters active</span>
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-lg-3 col-md-6">
+                                <label for="searchInput" class="form-label">Search Transactions</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-search"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="searchInput" 
+                                           placeholder="Sale #, customer, product, batch code...">
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-md-6">
+                                <label for="dateRange" class="form-label">Date Range</label>
+                                <input type="text" class="form-control" id="dateRange" 
+                                       placeholder="Select date range" readonly>
+                            </div>
+                            <div class="col-lg-2 col-md-4">
+                                <label for="paymentMethodFilter" class="form-label">Payment Method</label>
+                                <select class="form-select" id="paymentMethodFilter">
+                                    <option value="">All Methods</option>
+                                    <option value="Cash">Cash</option>
+                                    <option value="Credit Card">Credit Card</option>
+                                    <option value="Debit Card">Debit Card</option>
+                                    <option value="Digital Wallet">Digital Wallet</option>
+                                    <option value="Bank Transfer">Bank Transfer</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-1 col-md-6">
+                                <label for="recordsPerPage" class="form-label">Per Page</label>
+                                <select class="form-select" id="recordsPerPage">
+                                    <option value="10">10</option>
+                                    <option value="20" selected>20</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Highland Fresh Advanced Filters (Collapsible) -->
+                        <div class="mt-3">
+                            <button class="btn btn-link p-0 text-decoration-none" type="button" data-bs-toggle="collapse" 
+                                    data-bs-target="#advancedFilters" aria-expanded="false">
+                                <i class="bi bi-funnel-fill me-1"></i>Highland Fresh Advanced Filters
+                                <i class="bi bi-chevron-down ms-1"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="collapse" id="advancedFilters">
+                            <div class="row g-3 mt-2 p-3 bg-light rounded">
+                                <div class="col-lg-3 col-md-6">
+                                    <label for="coldChainFilter" class="form-label">Cold Chain Required</label>
+                                    <select class="form-select" id="coldChainFilter">
+                                        <option value="">All Transactions</option>
+                                        <option value="1">Cold Chain Required</option>
+                                        <option value="0">No Cold Chain</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <label for="deliveryFilter" class="form-label">Delivery Required</label>
+                                    <select class="form-select" id="deliveryFilter">
+                                        <option value="">All Transactions</option>
+                                        <option value="1">Delivery Required</option>
+                                        <option value="0">No Delivery</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <label for="qualityCheckFilter" class="form-label">Quality Check</label>
+                                    <select class="form-select" id="qualityCheckFilter">
+                                        <option value="">All Transactions</option>
+                                        <option value="1">Quality Checked</option>
+                                        <option value="0">No Quality Check</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <label for="cooperativeCodeFilter" class="form-label">Cooperative Code</label>
+                                    <input type="text" class="form-control" id="cooperativeCodeFilter" 
+                                           placeholder="Enter cooperative code">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-12 d-flex gap-2">
+                                <button class="btn btn-outline-secondary" title="Clear All Filters">
+                                    <i class="bi bi-x-circle me-1"></i>Clear Filters
+                                </button>
+                                <button class="btn btn-outline-info" title="Export to Excel">
+                                    <i class="bi bi-file-earmark-excel me-1"></i>Export Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-row mb-4">
+            <div class="row g-0">
+                <div class="col-md-2 col-6">
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalTransactions">-</span>
+                        <div class="stat-label">Total Transactions</div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-6">
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalSales">-</span>
+                        <div class="stat-label">Total Sales</div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-6">
+                    <div class="stat-item">
+                        <span class="stat-number" id="todaysSales">-</span>
+                        <div class="stat-label">Today's Sales</div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-6">
+                    <div class="stat-item">
+                        <span class="stat-number" id="avgTransaction">-</span>
+                        <div class="stat-label">Avg Transaction</div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-6">
+                    <div class="stat-item">
+                        <span class="stat-number" id="cooperativeTransactions">-</span>
+                        <div class="stat-label">Cooperative Sales</div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-6">
+                    <div class="stat-item">
+                        <span class="stat-number" id="coldChainTransactions">-</span>
+                        <div class="stat-label">Cold Chain</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card main-card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0" style="color: var(--hf-primary); font-weight: 600;">
+                                <i class="bi bi-receipt me-2"></i>Highland Fresh Sales Transactions
+                            </h6>
+                            <span class="badge bg-light text-muted" id="transactionCount">0 transactions</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="loadingState" class="text-center py-5 loading-spinner">
+                            <div class="spinner-border" style="color: var(--hf-primary);" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Loading transactions...</p>
+                        </div>
+                        <div id="emptyState" class="text-center py-5" style="display: none;">
+                            <i class="bi bi-inbox fa-4x text-muted mb-3"></i>
+                            <h4 class="text-muted">No Transactions Found</h4>
+                            <p class="text-muted">No transactions match your current filters.</p>
+                        </div>
+                        <div id="transactionTable" class="table-responsive d-none d-lg-block transaction-table" style="display: none;">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr style="background: var(--hf-primary); color: white;">
+                                        <th>Sale #</th>
+                                        <th>Date & Time</th>
+                                        <th>Customer</th>
+                                        <th>Items</th>
+                                        <th>Payment</th>
+                                        <th>Amount</th>
+                                        <th>Processed By</th>
+                                        <th>Status</th>
+                                        <th width="120">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactionTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="transactionCards" class="d-lg-none" style="display: none;">
+                            <div id="transactionCardsContainer">
+                            </div>
+                        </div>
+                        <div id="paginationContainer" class="d-flex justify-content-between align-items-center mt-4" style="display: none;">
+                            <div>
+                                <span class="text-muted" id="paginationInfo">Showing 1-20 of 100 results</span>
+                            </div>
+                            <nav>
+                                <ul class="pagination pagination-sm mb-0" id="paginationControls">
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="transactionDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content main-card">
+                <div class="modal-header" style="background: var(--hf-primary); color: white; border-radius: 20px 20px 0 0;">
+                    <h5 class="modal-title"><i class="bi bi-receipt me-2"></i>Highland Fresh Transaction Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="transactionDetailsContent">
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-feature">
+                        <i class="bi bi-printer me-1"></i>Print Receipt
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+        <div id="errorAlert" class="alert alert-danger alert-dismissible fade border-0" role="alert" style="display: none; border-radius: 15px; box-shadow: var(--hf-shadow);">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <span id="errorMessage">An error occurred</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+        <div id="successAlert" class="alert alert-success alert-dismissible fade border-0" role="alert" style="display: none; border-radius: 15px; box-shadow: var(--hf-shadow);">
+            <i class="bi bi-check-circle me-2"></i>
+            <span id="successMessage">Operation successful</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/api-handler.js"></script>
+    <script src="../js/cashier/TransactionHistory.js"></script>
+    <script src="../js/cashier/TransactionSearch.js"></script>
+    <script src="../js/cashier/ReceiptManager.js"></script>
+    <script src="../js/user-display-utils.js"></script>
+    <script src="../js/transaction-history/TransactionHistoryPageInit.js"></script>
+</body>
+</html>

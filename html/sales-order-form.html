@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Sales Order - Highland Fresh</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="../css/styles.css" rel="stylesheet">
+</head>
+<body>
+    
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="sales-dashboard.html">
+                <img src="../images/highland_fresh_logo.jpg" alt="Highland Fresh Logo" class="navbar-logo">
+                Highland Fresh - Sales Orders
+            </a>
+            <div class="navbar-nav ms-auto d-flex align-items-center">
+                <span class="navbar-text me-3" id="userWelcome">
+                    <i class="bi bi-person-circle me-1"></i>Welcome, <span id="currentUser">Sales Officer</span>!
+                </span>
+                <a href="sales-dashboard.html" class="btn btn-outline-secondary btn-sm me-2">
+                    <i class="bi bi-grid me-1"></i>Dashboard
+                </a>
+                <a href="sales-orders.html" class="btn btn-feature btn-sm me-2">
+                    <i class="bi bi-list-check me-1"></i>Orders
+                </a>
+                <a href="sales-dashboard.html" class="btn btn-warning btn-sm me-2" title="Record payments for dispatched orders">
+                    <i class="bi bi-cash-coin me-1"></i>Record Payments
+                </a>
+                <button class="btn btn-outline-danger btn-sm" onclick="authLogout()">
+                    <i class="bi bi-box-arrow-right me-1"></i>Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4 mb-5">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="dashboard-title">
+                    <i class="bi bi-plus-circle me-2"></i>Create Sales Order
+                </h1>
+                <p class="dashboard-subtitle">Create a wholesale order on behalf of a customer</p>
+            </div>
+        </div>
+
+        <!-- Order Form -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="main-card">
+                    <div class="card-body">
+                        <form id="salesOrderForm">
+                            <!-- Step 1: Select Customer -->
+                            <h5 class="mb-3">
+                                <i class="bi bi-person-check me-2"></i>Step 1: Select Customer
+                            </h5>
+                            
+                            <div class="mb-4">
+                                <label for="customerSelect" class="form-label">Customer *</label>
+                                <select class="form-select" id="customerSelect" required>
+                                    <option value="">Loading customers...</option>
+                                </select>
+                                <div class="form-text">
+                                    Select an independent reseller (driver)
+                                </div>
+                            </div>
+
+                            <!-- Customer Info Display -->
+                            <div id="customerInfo" class="alert alert-info" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Type:</strong> <span id="customerType"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Credit Limit:</strong> <span id="customerCreditLimit"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <!-- Step 2: Add Products -->
+                            <h5 class="mb-3">
+                                <i class="bi bi-cart-plus me-2"></i>Step 2: Add Products
+                            </h5>
+
+                            <div class="mb-3">
+                                <label for="productSearch" class="form-label">Search Product</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="productSearch" placeholder="Type product name or SKU...">
+                                    <button class="btn btn-feature" type="button" id="searchProductBtn">
+                                        <i class="bi bi-search me-1"></i>Search Product
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Selected Products Table -->
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="orderItemsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th style="width: 120px;">Quantity</th>
+                                            <th style="width: 120px;">Price</th>
+                                            <th style="width: 120px;">Total</th>
+                                            <th style="width: 60px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="orderItemsBody">
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted">
+                                                No products added yet. Search and add products above.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <!-- Step 3: Order Details -->
+                            <h5 class="mb-3">
+                                <i class="bi bi-file-text me-2"></i>Step 3: Order Details
+                            </h5>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="deliveryDate" class="form-label">Delivery Date *</label>
+                                    <input type="date" class="form-control" id="deliveryDate" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="paymentTerms" class="form-label">Payment Terms *</label>
+                                    <select class="form-select" id="paymentTerms" required>
+                                        <option value="">Select payment terms</option>
+                                        <option value="1">Cash on Delivery</option>
+                                        <option value="2">Net 7 Days</option>
+                                        <option value="3">Net 15 Days</option>
+                                        <option value="4">Net 30 Days</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="orderNotes" class="form-label">Notes (Optional)</label>
+                                <textarea class="form-control" id="orderNotes" rows="3" placeholder="Add any special instructions or notes..."></textarea>
+                            </div>
+
+                            <!-- FIFO Preview Section (3-GAP-1) -->
+                            <div id="fifoPreviewSection" class="mb-4" style="display: none;">
+                                <div class="card border-success">
+                                    <div class="card-header bg-success text-white">
+                                        <h6 class="mb-0">
+                                            <i class="bi bi-boxes me-2"></i>FIFO Batch Preview
+                                            <small class="float-end">(Oldest batches selected first)</small>
+                                        </h6>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div id="fifoPreviewContent">
+                                            <!-- FIFO allocation will be displayed here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="d-flex justify-content-between mt-4">
+                                <a href="sales-dashboard.html" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle me-1"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn btn-feature" id="submitOrderBtn">
+                                    <span class="spinner-border spinner-border-sm d-none me-2" id="submitSpinner"></span>
+                                    <i class="bi bi-check-circle me-1"></i>Submit Order
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary Sidebar -->
+            <div class="col-lg-4">
+                <div class="main-card">
+                    <div class="card-body">
+                        <h5 class="mb-3">Order Summary</h5>
+                        
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal:</span>
+                            <strong id="orderSubtotal">₱0.00</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Tax (12%):</span>
+                            <strong id="orderTax">₱0.00</strong>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <h5>Total:</h5>
+                            <h5 class="text-primary" id="orderTotal">₱0.00</h5>
+                        </div>
+
+                        <!-- FIFO Preview Button (3-GAP-1) -->
+                        <button type="button" class="btn btn-outline-success w-100 mb-3" id="previewFifoBtn" onclick="window.salesOrders.previewFifoBatches()" disabled>
+                            <i class="bi bi-boxes me-1"></i>Preview FIFO Batches
+                        </button>
+
+                        <!-- Stock Status Alert -->
+                        <div id="stockStatusAlert" class="alert alert-info" style="display: none;">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <span id="stockStatusMessage">Add products to check availability</span>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <small>Order will be created with status "Pending Approval". Stock will be reserved automatically.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Walk-in Sale Quick Action -->
+                <div class="main-card mt-3">
+                    <div class="card-body">
+                        <h6 class="text-muted mb-3">
+                            <i class="bi bi-lightning-charge me-1"></i>Quick Actions
+                        </h6>
+                        <button type="button" class="btn btn-success w-100" onclick="window.salesOrders.createWalkInSale()">
+                            <i class="bi bi-cash-coin me-1"></i>Process as Walk-in Sale (Cash)
+                        </button>
+                        <small class="text-muted d-block mt-2">
+                            <i class="bi bi-info-circle me-1"></i>Immediate payment & stock deduction
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Search Modal -->
+    <div class="modal fade" id="productSearchModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-gradient text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-box-seam me-2"></i>Select Product to Add
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Search hint -->
+                    <div class="alert alert-info mb-3">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Tip:</strong> Click on any product row or the "Add to Order" button to add it to your order
+                    </div>
+                    
+                    <!-- Products table -->
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered">
+                            <thead class="table-success">
+                                <tr>
+                                    <th style="width: 15%;">SKU</th>
+                                    <th style="width: 35%;">Product Name</th>
+                                    <th style="width: 15%;">Price</th>
+                                    <th style="width: 15%;">Stock Available</th>
+                                    <th style="width: 20%;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productSearchResults">
+                                <!-- Products will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Walk-in Sale Modal (3-GAP-4) -->
+    <div class="modal fade" id="walkInSaleModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-cash-coin me-2"></i>Process Walk-in Sale
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>FIFO Automatic:</strong> Stock will be deducted from oldest batches first.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Customer Name (Optional)</label>
+                        <input type="text" class="form-control" id="walkInCustomerName" placeholder="Walk-in Customer">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Payment Method</label>
+                        <select class="form-select" id="walkInPaymentMethod">
+                            <option value="Cash" selected>Cash</option>
+                            <option value="Card">Card</option>
+                            <option value="GCash">GCash</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                        </select>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Total Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₱</span>
+                                <input type="text" class="form-control" id="walkInTotal" readonly>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Amount Tendered</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₱</span>
+                                <input type="number" class="form-control" id="walkInAmountTendered" step="0.01" min="0" onchange="window.salesOrders.calculateChange()">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 p-3 bg-light rounded">
+                        <div class="d-flex justify-content-between">
+                            <strong>Change:</strong>
+                            <strong class="text-success" id="walkInChange">₱0.00</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="window.salesOrders.confirmWalkInSale()">
+                        <i class="bi bi-check-circle me-1"></i>Complete Sale
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Modal (3-GAP-2) -->
+    <div class="modal fade" id="receiptModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-receipt me-2"></i>Sales Receipt
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="receiptContent">
+                    <!-- Receipt content will be generated here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="window.salesOrders.printReceipt()">
+                        <i class="bi bi-printer me-1"></i>Print Receipt
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="../js/api-handler.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/sales-orders.js"></script>
+</body>
+</html>

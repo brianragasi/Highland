@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Reports - Highland Fresh</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/highland-theme.css">
+    <style>
+        .report-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid #dee2e6;
+        }
+        
+        .report-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-color: var(--highland-primary);
+        }
+        
+        .report-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stats-row {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--highland-primary);
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-highland">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="../assets/highland-logo.png" alt="Highland Fresh" height="40" class="me-2">
+                <span class="brand-text">Highland Fresh</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="production-dashboard.html">
+                            <i class="bi bi-arrow-left"></i> Back to Dashboard
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <div class="user-avatar me-2">
+                                <i class="bi bi-person-circle"></i>
+                            </div>
+                            <div class="user-info d-none d-md-block">
+                                <div class="user-name" id="userName">Loading...</div>
+                                <div class="user-role" id="userRole">Loading...</div>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="profile.html"><i class="bi bi-person"></i> Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="HighlandFreshPageUtils.logout()"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="main-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="card-title">
+                            <i class="bi bi-graph-up text-success"></i> Production Reports
+                        </h2>
+                        <div class="d-flex gap-2">
+                            <select class="form-select" id="reportPeriod" style="width: auto;">
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month" selected>This Month</option>
+                                <option value="quarter">This Quarter</option>
+                                <option value="year">This Year</option>
+                            </select>
+                            <button class="btn btn-highland-outline" onclick="refreshReports()">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Key Statistics -->
+                    <div class="stats-row">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-number" id="totalBatches">24</div>
+                                    <div class="stat-label">Total Batches</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-number" id="totalProduction">1,847</div>
+                                    <div class="stat-label">Units Produced</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-number text-success" id="efficiencyRate">94%</div>
+                                    <div class="stat-label">Efficiency Rate</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-number text-warning" id="wasteRate">2.3%</div>
+                                    <div class="stat-label">Waste Rate</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Report Categories -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-lg-4 col-md-6">
+                            <div class="report-card card h-100 text-center p-4" onclick="generateProductionSummary()">
+                                <i class="bi bi-clipboard-data report-icon text-primary"></i>
+                                <h5>Production Summary</h5>
+                                <p class="text-muted">Comprehensive overview of all production activities</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="report-card card h-100 text-center p-4" onclick="generateBatchAnalysis()">
+                                <i class="bi bi-bar-chart report-icon text-success"></i>
+                                <h5>Batch Analysis</h5>
+                                <p class="text-muted">Detailed analysis of batch performance and efficiency</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="report-card card h-100 text-center p-4" onclick="generateQualityReport()">
+                                <i class="bi bi-shield-check report-icon text-warning"></i>
+                                <h5>Quality Control</h5>
+                                <p class="text-muted">Quality metrics and compliance tracking</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="report-card card h-100 text-center p-4" onclick="generateMaterialUsage()">
+                                <i class="bi bi-box-seam report-icon text-info"></i>
+                                <h5>Material Usage</h5>
+                                <p class="text-muted">Raw materials consumption and waste analysis</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="report-card card h-100 text-center p-4" onclick="generateProductivityReport()">
+                                <i class="bi bi-speedometer2 report-icon text-danger"></i>
+                                <h5>Productivity</h5>
+                                <p class="text-muted">Production rates and performance trends</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="report-card card h-100 text-center p-4" onclick="generateCustomReport()">
+                                <i class="bi bi-gear report-icon text-secondary"></i>
+                                <h5>Custom Reports</h5>
+                                <p class="text-muted">Create custom reports with specific parameters</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Charts Preview -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <h5 class="mb-3">
+                                    <i class="bi bi-graph-up text-primary"></i> Production Trends
+                                </h5>
+                                <div id="productionChart" class="text-center py-4">
+                                    <p class="text-muted">Production trend chart will be displayed here</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <h5 class="mb-3">
+                                    <i class="bi bi-pie-chart text-success"></i> Product Distribution
+                                </h5>
+                                <div id="distributionChart" class="text-center py-4">
+                                    <p class="text-muted">Product distribution chart will be displayed here</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Generation Modal -->
+    <div class="modal fade" id="reportModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reportModalTitle">Generate Report</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="reportContent">
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-highland-primary" role="status"></div>
+                            <p class="mt-2">Generating report...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-highland" onclick="downloadReport()">
+                        <i class="bi bi-download"></i> Download Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/user-display-utils.js"></script>
+    <script src="../js/common/HighlandFreshPageUtils.js"></script>
+    <script src="../js/production/ProductionReportsPageInit.js"></script>
+</body>
+</html>

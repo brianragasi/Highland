@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Highland Fresh - Sales Officer Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="sales-dashboard.html">
+                <img src="../images/highland_fresh_logo.jpg" alt="Highland Fresh Logo" class="navbar-logo">
+                Highland Fresh - Sales Officer
+            </a>
+            <div class="navbar-nav ms-auto d-flex align-items-center">
+                <span class="navbar-text me-3" id="userWelcome">
+                    <i class="bi bi-person-circle me-1"></i>Welcome, Sales Officer
+                </span>
+                <button class="btn btn-outline-danger btn-sm" onclick="authLogout()">
+                    <i class="bi bi-box-arrow-right me-1"></i>Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4 mb-5">
+        <div class="row">
+            <div class="col-12">
+
+                <!-- Page Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 class="dashboard-title mb-2">
+                            <i class="bi bi-cart-check me-2"></i>Sales Officer Dashboard
+                        </h1>
+                        <p class="dashboard-subtitle mb-0">
+                            <i class="bi bi-briefcase-fill me-1"></i>
+                            Manage wholesale orders for independent resellers (drivers)
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Container for Notifications -->
+        <div id="alertContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
+
+        <!-- Quick Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="main-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3" style="font-size: 2rem; color: var(--hf-warning);">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <h3 class="mb-1" id="pendingOrdersCount">
+                            <span class="spinner-border spinner-border-sm"></span>
+                        </h3>
+                        <p class="text-muted mb-0">Pending Orders</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="main-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3" style="font-size: 2rem; color: var(--hf-primary);">
+                            <i class="bi bi-calendar-check"></i>
+                        </div>
+                        <h3 class="mb-1" id="todayOrdersCount">
+                            <span class="spinner-border spinner-border-sm"></span>
+                        </h3>
+                        <p class="text-muted mb-0">Today's Orders</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="main-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3" style="font-size: 2rem; color: var(--hf-success);">
+                            <i class="bi bi-currency-peso"></i>
+                        </div>
+                        <h3 class="mb-1" id="todayRevenue">
+                            <span class="spinner-border spinner-border-sm"></span>
+                        </h3>
+                        <p class="text-muted mb-0">Today's Revenue</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="main-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3" style="font-size: 2rem; color: var(--hf-danger);">
+                            <i class="bi bi-cash-coin"></i>
+                        </div>
+                        <h3 class="mb-1" id="unpaidOrdersCount">
+                            <span class="spinner-border spinner-border-sm"></span>
+                        </h3>
+                        <p class="text-muted mb-0">Unpaid Orders</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Action Cards -->
+        <div class="row mb-4">
+            <div class="col-lg-6 mb-4">
+                <div class="feature-card" style="cursor: pointer;"
+                    onclick="window.location.href='sales-order-form.html'">
+                    <div class="card-body">
+                        <div class="feature-icon">
+                            <i class="bi bi-plus-circle"></i>
+                        </div>
+                        <h4 class="card-title">Create New Order</h4>
+                        <p class="card-text mb-4">
+                            Create a wholesale sales order on behalf of a customer (Independent Reseller - Driver).
+                        </p>
+                        <button class="btn btn-feature">
+                            <i class="bi bi-plus-lg me-2"></i>New Order
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 mb-4">
+                <div class="feature-card" style="cursor: pointer;" onclick="window.location.href='sales-orders.html'">
+                    <div class="card-body">
+                        <div class="feature-icon">
+                            <i class="bi bi-list-check"></i>
+                        </div>
+                        <h4 class="card-title">View Orders</h4>
+                        <p class="card-text mb-4">
+                            View, manage, and track all sales orders - pending, approved, and completed.
+                        </p>
+                        <button class="btn btn-feature">
+                            <i class="bi bi-eye me-2"></i>View Orders
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paid Orders History -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="main-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0 d-flex align-items-center">
+                                <i class="bi bi-check-circle-fill me-2" style="color: var(--hf-success);"></i>
+                                Paid Orders History - Completed Payments
+                            </h5>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-primary" onclick="loadPaidOrders()">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="togglePaidOrders()">
+                                    <i class="bi bi-chevron-down me-1" id="paidOrdersToggleIcon"></i>
+                                    <span id="paidOrdersToggleText">Show</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="paidOrdersSection" style="display: none;">
+                            <!-- Filter Options -->
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <label for="paidOrdersDateFrom" class="form-label">From Date</label>
+                                    <input type="date" class="form-control form-control-sm" id="paidOrdersDateFrom">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="paidOrdersDateTo" class="form-label">To Date</label>
+                                    <input type="date" class="form-control form-control-sm" id="paidOrdersDateTo">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="paidOrdersLimit" class="form-label">Show</label>
+                                    <select class="form-select form-select-sm" id="paidOrdersLimit">
+                                        <option value="10">Last 10</option>
+                                        <option value="25" selected>Last 25</option>
+                                        <option value="50">Last 50</option>
+                                        <option value="100">Last 100</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <button class="btn btn-sm btn-primary w-100" onclick="loadPaidOrders()">
+                                        <i class="bi bi-filter me-1"></i>Apply Filters
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="paidOrdersContainer">
+                                <div class="text-center py-5">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mt-2 text-muted">Loading paid orders...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unpaid Orders - Cash on Delivery -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="main-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0 d-flex align-items-center">
+                                <i class="bi bi-cash-coin me-2" style="color: var(--hf-danger);"></i>
+                                Unpaid Orders - Awaiting Payment Collection
+                            </h5>
+                            <button class="btn btn-sm btn-outline-primary" onclick="refreshUnpaidOrders()">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                            </button>
+                        </div>
+
+                        <div id="unpaidOrdersContainer">
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2 text-muted">Loading unpaid orders...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Orders for Approval -->
+        <div class="row">
+            <div class="col-12">
+                <div class="main-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0 d-flex align-items-center">
+                                <i class="bi bi-clipboard-check me-2" style="color: var(--hf-warning);"></i>
+                                Pending Orders - Awaiting Your Approval
+                            </h5>
+                            <a href="sales-orders.html?status=1" class="btn btn-sm btn-outline-primary">
+                                View All <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+
+                        <div id="pendingOrdersContainer">
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2 text-muted">Loading pending orders...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Record Payment Modal -->
+        <div class="modal fade" id="recordPaymentModal" tabindex="-1" aria-labelledby="recordPaymentModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="recordPaymentModalLabel">
+                            <i class="bi bi-cash-coin me-2"></i>Record Payment
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="recordPaymentForm">
+                            <input type="hidden" id="paymentSaleId">
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Order Details:</label>
+                                <div class="p-3 bg-light rounded">
+                                    <p class="mb-1"><strong>Order Number:</strong> <span id="paymentOrderNumber"></span>
+                                    </p>
+                                    <p class="mb-1"><strong>Customer:</strong> <span id="paymentCustomerName"></span>
+                                    </p>
+                                    <p class="mb-1"><strong>Total Amount:</strong> ₱<span
+                                            id="paymentTotalAmount"></span></p>
+                                    <p class="mb-1"><strong>Already Paid:</strong> ₱<span
+                                            id="paymentAlreadyPaid"></span></p>
+                                    <p class="mb-0"><strong class="text-danger">Balance Due:</strong> <strong
+                                            class="text-danger">₱<span id="paymentBalanceDue"></span></strong></p>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="paymentAmount" class="form-label">Amount Received <span
+                                        class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₱</span>
+                                    <input type="number" class="form-control" id="paymentAmount" step="0.01" min="0.01"
+                                        required>
+                                </div>
+                                <div class="form-text">Enter the amount the customer is paying now</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="paymentMethodId" class="form-label">Payment Method <span
+                                        class="text-danger">*</span></label>
+                                <select class="form-select" id="paymentMethodId" required>
+                                    <option value="">Select payment method...</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="paymentReference" class="form-label">Reference Number</label>
+                                <input type="text" class="form-control" id="paymentReference"
+                                    placeholder="Check number, bank transaction ID, etc.">
+                                <div class="form-text">Optional: Enter check number or bank reference</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="paymentNotes" class="form-label">Notes</label>
+                                <textarea class="form-control" id="paymentNotes" rows="2"
+                                    placeholder="Any additional notes about this payment..."></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-success" onclick="submitPayment()">
+                            <i class="bi bi-check-circle me-1"></i>Record Payment
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Details Modal -->
+        <div class="modal fade" id="paymentDetailsModal" tabindex="-1" aria-labelledby="paymentDetailsModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title" id="paymentDetailsModalLabel">
+                            <i class="bi bi-receipt me-2"></i>Payment History Details
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="paymentDetailsContent">
+                            <!-- Content will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Container for Notifications -->
+    <div id="alertContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="../js/api-handler.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/sales-dashboard.js"></script>
+</body>
+
+</html>

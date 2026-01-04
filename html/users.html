@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en    </nav>
+    <script src="../js/user-display-utils.js"></script>
+    <script src="../js/session-manager.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Highland Fresh - User Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="admin-dashboard.html">
+                <img src="../images/highland_fresh_logo.jpg" alt="Highland Fresh Logo" class="navbar-logo">
+                Highland Fresh - Users
+            </a>
+            <div class="navbar-nav ms-auto d-flex align-items-center">
+                <span class="navbar-text me-3" id="userWelcome">
+                    <i class="bi bi-person-circle me-1"></i>Welcome, <span id="currentUser">User</span>!
+                </span>
+                <a href="admin-dashboard.html" class="btn btn-outline-secondary btn-sm me-2">
+                    <i class="bi bi-grid me-1"></i>Dashboard
+                </a>
+                <button class="btn btn-outline-danger btn-sm">
+                    <i class="bi bi-box-arrow-right me-1"></i>Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+        <script src="../js/user-display-utils.js"></script>
+    <div class="container mt-4 mb-5">
+        <div class="row">
+            <div class="col-12">
+                
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 class="dashboard-title mb-2">
+                            <i class="bi bi-people-fill me-2"></i>User Management
+                        </h1>
+                        <p class="dashboard-subtitle mb-0">
+                            <i class="bi bi-building me-1"></i>
+                            El Salvador Processing Plant - Highland Fresh Staff Administration
+                        </p>
+                    </div>
+                    <button class="btn btn-feature" data-bs-toggle="modal" data-bs-target="#userModal">
+                        <i class="bi bi-person-plus me-1"></i>Add User
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="alertContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
+
+        <div id="loadingSpinner" class="text-center d-none">
+            <div class="spinner-border" style="color: var(--hf-primary);" role="status">
+                <span class="visually-hidden">Loading Highland Fresh users...</span>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="card main-card">
+                    <div class="card-body">
+                        <div class="table-container">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="color: var(--text-primary); font-weight: 600;">Username</th>
+                                            <th style="color: var(--text-primary); font-weight: 600;">Name</th>
+                                            <th style="color: var(--text-primary); font-weight: 600;">Email</th>
+                                            <th style="color: var(--text-primary); font-weight: 600;">Highland Fresh Role</th>
+                                            <th style="color: var(--text-primary); font-weight: 600;">Status</th>
+                                            <th style="color: var(--text-primary); font-weight: 600;">Last Login</th>
+                                            <th style="color: var(--text-primary); font-weight: 600;">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usersTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="emptyState" class="text-center py-5 d-none">
+                            <div class="feature-icon mx-auto mb-3" style="width: 64px; height: 64px; font-size: 1.5rem;">
+                                <i class="bi bi-people"></i>
+                            </div>
+                            <h5 class="text-muted mt-3">No Highland Fresh users found</h5>
+                            <p class="text-muted">Create your first user account for the El Salvador processing plant operations.</p>
+                            <button class="btn btn-feature" data-bs-toggle="modal" data-bs-target="#userModal">
+                                <i class="bi bi-person-plus me-1"></i>Add First User
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="userModalLabel" style="color: var(--text-primary); font-weight: 600;">
+                        <i class="bi bi-person-plus me-2"></i>Add Highland Fresh User
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="userForm" novalidate>
+                        <input type="hidden" id="userId" name="userId">
+                        
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="firstName" class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="firstName" name="firstName" required>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="lastName" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="lastName" name="lastName" required>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Highland Fresh Role</label>
+                            <select class="form-select" id="role" name="role" required>
+                                <option value="">Select Highland Fresh Role</option>
+                                <!-- Role options are populated dynamically from the database -->
+                            </select>
+                            <div class="invalid-feedback"></div>
+                            <div class="form-text">
+                                <small style="color: var(--text-secondary);">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Role determines system permissions and access levels within Highland Fresh operations.
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone" name="phone">
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        
+                        <div class="mb-3" id="statusGroup" style="display: none;">
+                            <label for="isActive" class="form-label">Status</label>
+                            <select class="form-select" id="isActive" name="isActive">
+                                <option value="1">Active</option>
+                                <option value="0">Inactive</option>
+                            </select>
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        
+                        <div class="mb-3" id="passwordGroup">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <div class="invalid-feedback"></div>
+                            <div class="form-text">Password must be at least 8 characters long and include upper, lower, and a number.</div>
+                        </div>
+                        
+                        <div class="mb-3 d-none" id="changePasswordGroup">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="changePassword" name="changePassword">
+                                <label class="form-check-label" for="changePassword">
+                                    Change Password
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3 d-none" id="newPasswordGroup">
+                            <label for="newPassword" class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="newPassword" name="newPassword">
+                            <div class="invalid-feedback"></div>
+                            <div class="form-text">Password must be at least 8 characters long and include upper, lower, and a number.</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-feature" id="saveUserBtn">
+                        <span class="spinner-border spinner-border-sm d-none me-2" id="saveSpinner"></span>
+                        Save User
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title" id="deleteModalLabel" style="color: var(--text-primary); font-weight: 600;">
+                        <i class="bi bi-exclamation-triangle me-2" style="color: var(--danger-color);"></i>Confirm Delete
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p style="color: var(--text-primary);">Are you sure you want to delete this Highland Fresh user?</p>
+                    <div class="alert alert-warning" style="background-color: #fff8dc; border: 1px solid #ffeaa7; color: #d63031;">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Warning:</strong> This action cannot be undone.
+                    </div>
+                    <p><strong style="color: var(--text-primary);">User:</strong> <span id="deleteUserName" style="color: var(--text-secondary);"></span></p>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                        <span class="spinner-border spinner-border-sm d-none me-2" id="deleteSpinner"></span>
+                        Delete User
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+    <script src="../js/api-handler.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/api-handler.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/dashboard.js"></script>
+    <script src="../js/users/UserAPI.js"></script>
+    <script src="../js/users/UserModal.js"></script>
+    <script src="../js/users/UserRenderer.js"></script>
+    <script src="../js/users/UserManager.js"></script>
+    <script src="../js/users/UsersPageInit.js"></script>
+</body>
+</html>

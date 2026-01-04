@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Highland Fresh - Raw Materials Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        :root {
+            --hf-primary: #198754;
+            --hf-primary-light: #d1e7dd;
+            --hf-primary-hover: #157347;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, var(--hf-primary), #20c997) !important;
+        }
+        
+        .navbar-brand, .navbar-text, .nav-link {
+            color: white !important;
+        }
+        
+        .card-header-hf {
+            background: var(--hf-primary);
+            color: white;
+        }
+        
+        .btn-hf {
+            background: var(--hf-primary);
+            border-color: var(--hf-primary);
+            color: white;
+        }
+        
+        .btn-hf:hover {
+            background: var(--hf-primary-hover);
+            border-color: var(--hf-primary-hover);
+            color: white;
+        }
+        
+        .table th {
+            background: var(--hf-primary-light);
+            font-weight: 600;
+        }
+        
+        .editable-cell {
+            cursor: pointer;
+            border: 1px dashed transparent;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .editable-cell:hover {
+            border-color: var(--hf-primary);
+            background: var(--hf-primary-light);
+        }
+        
+        .editable-cell input {
+            width: 80px;
+            text-align: center;
+        }
+        
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-ok { background: #d1e7dd; color: #0f5132; }
+        .status-low { background: #fff3cd; color: #664d03; }
+        .status-out { background: #f8d7da; color: #842029; }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="admin-dashboard.html">
+                <img src="../images/highland_fresh_logo.jpg" alt="Logo" style="height: 40px;" class="me-2">
+                Highland Fresh
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3" id="userWelcome">Welcome!</span>
+                <a href="admin-dashboard.html" class="btn btn-outline-light btn-sm me-2">Dashboard</a>
+                <button class="btn btn-outline-light btn-sm" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="text-success mb-1">
+                    <i class="bi bi-box-seam me-2"></i>Raw Materials Management
+                </h2>
+                <p class="text-muted mb-0">Configure reorder levels and view stock status</p>
+            </div>
+            <div>
+                <a href="warehouse-staff-dashboard.html" class="btn btn-outline-secondary me-2">
+                    <i class="bi bi-arrow-left"></i> Warehouse
+                </a>
+                <button class="btn btn-hf" onclick="loadRawMaterials()">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <h3 class="text-success mb-0" id="totalMaterials">--</h3>
+                        <small class="text-muted">Total Materials</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <h3 class="text-primary mb-0" id="inStockCount">--</h3>
+                        <small class="text-muted">In Stock</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <h3 class="text-warning mb-0" id="lowStockCount">--</h3>
+                        <small class="text-muted">Low Stock</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <h3 class="text-danger mb-0" id="outOfStockCount">--</h3>
+                        <small class="text-muted">Out of Stock</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Materials Table -->
+        <div class="card shadow-sm">
+            <div class="card-header card-header-hf d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-list-ul me-2"></i>Raw Materials</span>
+                <div class="input-group" style="max-width: 300px;">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search materials..." oninput="filterTable()">
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Material Name</th>
+                                <th>SKU</th>
+                                <th>Category</th>
+                                <th class="text-center">In Stock</th>
+                                <th class="text-center">Reorder Level</th>
+                                <th class="text-center">Std Order Qty</th>
+                                <th>Unit</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="materialsTableBody">
+                            <tr>
+                                <td colspan="9" class="text-center py-4">
+                                    <div class="spinner-border text-success" role="status"></div>
+                                    <p class="mb-0 mt-2 text-muted">Loading materials...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header card-header-hf">
+                    <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Edit Material Settings</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editMaterialId">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Material Name</label>
+                        <input type="text" class="form-control" id="editMaterialName" readonly>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Reorder Level</label>
+                            <input type="number" class="form-control" id="editReorderLevel" min="0" step="0.01">
+                            <small class="text-muted">Alert when stock falls below this</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Standard Order Qty</label>
+                            <input type="number" class="form-control" id="editStdOrderQty" min="0" step="0.01">
+                            <small class="text-muted">Default quantity to order</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-hf" onclick="saveSettings()">
+                        <i class="bi bi-check-lg me-1"></i>Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055;">
+        <div id="toast" class="toast align-items-center text-white border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body" id="toastMessage"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="../js/session-manager.js"></script>
+    <script>
+        let materialsData = [];
+        let editModal;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            editModal = new bootstrap.Modal(document.getElementById('editModal'));
+            loadRawMaterials();
+        });
+
+        async function loadRawMaterials() {
+            const tbody = document.getElementById('materialsTableBody');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="9" class="text-center py-4">
+                        <div class="spinner-border text-success" role="status"></div>
+                        <p class="mb-0 mt-2 text-muted">Loading materials...</p>
+                    </td>
+                </tr>
+            `;
+
+            try {
+                const response = await axios.get('../api/RawMaterialsAPI.php', {
+                    params: { action: 'get_all' },
+                    withCredentials: true
+                });
+
+                if (response.data.success) {
+                    materialsData = response.data.data || [];
+                    renderTable(materialsData);
+                    updateStats(materialsData);
+                }
+            } catch (error) {
+                console.error('Error loading materials:', error);
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-danger">
+                            <i class="bi bi-exclamation-triangle"></i> Failed to load materials
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function renderTable(materials) {
+            const tbody = document.getElementById('materialsTableBody');
+            
+            if (!materials || materials.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-muted">No materials found</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = materials.map(m => {
+                const qty = parseFloat(m.quantity_on_hand || 0);
+                const reorder = parseFloat(m.reorder_level || 0);
+                const status = getStatus(qty, reorder);
+
+                return `
+                    <tr>
+                        <td><strong>${escapeHtml(m.name || m.product_name)}</strong></td>
+                        <td><code>${escapeHtml(m.sku || m.barcode || 'N/A')}</code></td>
+                        <td>${escapeHtml(m.category || 'Uncategorized')}</td>
+                        <td class="text-center"><strong>${qty.toLocaleString('en-PH', {minimumFractionDigits: 2})}</strong></td>
+                        <td class="text-center">${reorder.toLocaleString('en-PH', {minimumFractionDigits: 2})}</td>
+                        <td class="text-center">${parseFloat(m.standard_order_quantity || 0).toLocaleString('en-PH', {minimumFractionDigits: 2})}</td>
+                        <td>${escapeHtml(m.unit || 'units')}</td>
+                        <td class="text-center"><span class="status-badge ${status.class}">${status.text}</span></td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-success" onclick="openEditModal(${m.product_id})" title="Edit Settings">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function getStatus(qty, reorder) {
+            if (qty === 0) return { class: 'status-out', text: 'Out of Stock' };
+            if (qty <= reorder) return { class: 'status-low', text: 'Low Stock' };
+            return { class: 'status-ok', text: 'In Stock' };
+        }
+
+        function updateStats(materials) {
+            let inStock = 0, low = 0, out = 0;
+            
+            materials.forEach(m => {
+                const qty = parseFloat(m.quantity_on_hand || 0);
+                const reorder = parseFloat(m.reorder_level || 0);
+                
+                if (qty === 0) out++;
+                else if (qty <= reorder) low++;
+                else inStock++;
+            });
+
+            document.getElementById('totalMaterials').textContent = materials.length;
+            document.getElementById('inStockCount').textContent = inStock;
+            document.getElementById('lowStockCount').textContent = low;
+            document.getElementById('outOfStockCount').textContent = out;
+        }
+
+        function filterTable() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = materialsData.filter(m => 
+                (m.name || '').toLowerCase().includes(search) ||
+                (m.sku || '').toLowerCase().includes(search) ||
+                (m.category || '').toLowerCase().includes(search)
+            );
+            renderTable(filtered);
+        }
+
+        function openEditModal(materialId) {
+            const material = materialsData.find(m => m.product_id == materialId);
+            if (!material) return;
+
+            document.getElementById('editMaterialId').value = materialId;
+            document.getElementById('editMaterialName').value = material.name || material.product_name;
+            document.getElementById('editReorderLevel').value = parseFloat(material.reorder_level || 0);
+            document.getElementById('editStdOrderQty').value = parseFloat(material.standard_order_quantity || 0);
+
+            editModal.show();
+        }
+
+        async function saveSettings() {
+            const materialId = document.getElementById('editMaterialId').value;
+            const reorderLevel = parseFloat(document.getElementById('editReorderLevel').value) || 0;
+            const stdOrderQty = parseFloat(document.getElementById('editStdOrderQty').value) || 0;
+
+            try {
+                const response = await axios.post('../api/RawMaterialsAPI.php', {
+                    action: 'update_settings',
+                    raw_material_id: materialId,
+                    reorder_level: reorderLevel,
+                    standard_order_quantity: stdOrderQty
+                }, { withCredentials: true });
+
+                if (response.data.success) {
+                    showToast('Settings updated successfully', 'success');
+                    editModal.hide();
+                    loadRawMaterials();
+                } else {
+                    showToast(response.data.message || 'Failed to update', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Failed to save settings', 'error');
+            }
+        }
+
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toast.classList.remove('bg-success', 'bg-danger', 'bg-warning');
+            toast.classList.add(type === 'success' ? 'bg-success' : type === 'error' ? 'bg-danger' : 'bg-warning');
+            toastMessage.textContent = message;
+            
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function logout() {
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
