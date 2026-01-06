@@ -873,7 +873,9 @@ async function handleNewCollection(event) {
         }
     } catch (error) {
         console.error('[QC Dashboard] Error saving collection:', error);
-        showToast('Error saving milk collection', 'error');
+        // Show the actual server error message if available
+        const errorMessage = error.response?.data?.message || error.message || 'Error saving milk collection';
+        showToast(errorMessage, 'error');
     } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Save Collection';

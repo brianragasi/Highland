@@ -802,7 +802,7 @@ class WarehouseStaffDashboard {
                     withCredentials: true
                 }),
                 axios.get(APIResponseHandler.getApiUrl('ProductsAPI.php'), {
-                    params: { operation: 'getAllProducts' },
+                    params: { operation: 'getAllProducts', include_highland_fresh: true },
                     withCredentials: true
                 })
             ]);
@@ -878,7 +878,7 @@ class WarehouseStaffDashboard {
         if (!items || items.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="8" class="text-center py-4">
+                    <td colspan="7" class="text-center py-4">
                         <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
                         <p class="mb-0 mt-2 text-muted">No inventory items found</p>
                     </td>
@@ -887,37 +887,72 @@ class WarehouseStaffDashboard {
             return;
         }
 
-        tbody.innerHTML = items.map((item, idx) => {
-            const { statusClass, statusText } = this.getStockStatus(item.quantity, item.reorderLevel);
-            const typeColor = item.type === 'Raw Material' ? 'var(--hf-primary)' : '#6610f2';
-            const hasExpand = item.type === 'Raw Material' && item.materialId;
-            const expandBtn = hasExpand 
-                ? `<button class="btn btn-sm btn-outline-secondary py-0 px-1" onclick="toggleBatchDetails(${item.materialId}, ${idx})" title="View Batches (FIFO)">
-                       <i class="bi bi-chevron-down" id="expandIcon-${idx}"></i>
-                   </button>` 
-                : '';
-
-            return `
-                <tr>
-                    <td>
-                        <span style="color: ${typeColor};">
-                            <i class="bi ${item.typeIcon} me-1"></i>${item.type}
-                        </span>
-                    </td>
-                    <td><strong>${item.name}</strong> ${expandBtn}</td>
-                    <td><code style="font-size: 0.85rem; color: #6c757d;">${item.sku}</code></td>
-                    <td class="text-center"><strong>${item.quantity.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</strong></td>
-                    <td class="text-center">${item.reorderLevel.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
-                    <td class="text-center">${item.unit}</td>
-                    <td class="text-center"><span class="inventory-badge ${statusClass}">${statusText}</span></td>
-                </tr>
-                <tr id="batchRow-${idx}" class="batch-details-row" style="display: none;">
-                    <td colspan="8" class="p-0 bg-light">
-                        <div id="batchDetails-${idx}" class="p-2"></div>
+        // Separate items by type
+        const rawMaterials = items.filter(item => item.type === 'Raw Material');
+        const finishedProducts = items.filter(item => item.type === 'Finished Product');
+        
+        let html = '';
+        let idx = 0;
+        
+        // Raw Materials Section
+        if (rawMaterials.length > 0) {
+            html += `
+                <tr class="table-secondary">
+                    <td colspan="7" class="py-2">
+                        <strong><i class="bi bi-box me-2" style="color: var(--hf-primary);"></i>Raw Materials</strong>
+                        <span class="badge bg-secondary ms-2">${rawMaterials.length}</span>
                     </td>
                 </tr>
             `;
-        }).join('');
+            html += rawMaterials.map((item) => {
+                const currentIdx = idx++;
+                return this.renderInventoryRow(item, currentIdx);
+            }).join('');
+        }
+        
+        // Finished Products Section
+        if (finishedProducts.length > 0) {
+            html += `
+                <tr class="table-info">
+                    <td colspan="7" class="py-2">
+                        <strong><i class="bi bi-droplet me-2" style="color: #6610f2;"></i>Finished Products</strong>
+                        <span class="badge bg-info ms-2">${finishedProducts.length}</span>
+                    </td>
+                </tr>
+            `;
+            html += finishedProducts.map((item) => {
+                const currentIdx = idx++;
+                return this.renderInventoryRow(item, currentIdx);
+            }).join('');
+        }
+
+        tbody.innerHTML = html;
+    }
+
+    renderInventoryRow(item, idx) {
+        const { statusClass, statusText } = this.getStockStatus(item.quantity, item.reorderLevel);
+        const hasExpand = item.type === 'Raw Material' && item.materialId;
+        const expandBtn = hasExpand 
+            ? `<button class="btn btn-sm btn-outline-secondary py-0 px-1" onclick="toggleBatchDetails(${item.materialId}, ${idx})" title="View Batches (FIFO)">
+                   <i class="bi bi-chevron-down" id="expandIcon-${idx}"></i>
+               </button>` 
+            : '';
+
+        return `
+            <tr>
+                <td><strong>${item.name}</strong> ${expandBtn}</td>
+                <td><code style="font-size: 0.85rem; color: #6c757d;">${item.sku}</code></td>
+                <td class="text-end"><strong>${item.quantity.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</strong></td>
+                <td class="text-end">${item.reorderLevel.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                <td class="text-center">${item.unit}</td>
+                <td class="text-center"><span class="inventory-badge ${statusClass}">${statusText}</span></td>
+            </tr>
+            <tr id="batchRow-${idx}" class="batch-details-row" style="display: none;">
+                <td colspan="7" class="p-0 bg-light">
+                    <div id="batchDetails-${idx}" class="p-2"></div>
+                </td>
+            </tr>
+        `;
     }
 
     getStockStatus(quantity, reorder) {

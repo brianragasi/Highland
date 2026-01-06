@@ -23,6 +23,7 @@ class MilkCollectionAPI extends BaseAPI
     public function __construct()
     {
         parent::__construct();
+        $this->initializeSession();
     }
 
     /**
@@ -31,8 +32,20 @@ class MilkCollectionAPI extends BaseAPI
     public function handleRequest(): void
     {
         try {
-            $operation = $_GET['operation'] ?? $_POST['operation'] ?? '';
-            $input = array_merge($_GET, $_POST, $this->getJsonInput() ?? []);
+            // Parse input from various sources
+            $jsonInput = $this->getJsonInput() ?? [];
+            
+            // Also parse raw POST body for form-urlencoded data if $_POST is empty
+            $rawInput = [];
+            if (empty($_POST) && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                $rawBody = file_get_contents('php://input');
+                if ($rawBody) {
+                    parse_str($rawBody, $rawInput);
+                }
+            }
+            
+            $input = array_merge($_GET, $_POST, $rawInput, $jsonInput);
+            $operation = $input['operation'] ?? $_GET['operation'] ?? $_POST['operation'] ?? '';
 
             switch ($operation) {
                 // Dashboard & Stats
@@ -125,25 +138,19 @@ class MilkCollectionAPI extends BaseAPI
         try {
             $pdo = $this->db();
             $today = date('Ymd');
+            $datePrefix = 'RMR-' . $today . '-';
             
-            // Get the last RMR number for today
+            // Find the max sequence number by extracting the numeric suffix from RMR numbers
+            // Pattern: RMR-YYYYMMDD-XXX where XXX is a 3-digit number
             $stmt = $pdo->prepare("
-                SELECT rmr_number 
-                FROM milk_daily_collections 
+                SELECT MAX(CAST(SUBSTRING(rmr_number, -3) AS UNSIGNED)) as max_seq
+                FROM milk_daily_collections
                 WHERE rmr_number LIKE ?
-                ORDER BY rmr_number DESC 
-                LIMIT 1
+                  AND rmr_number REGEXP '^RMR-[0-9]{8}-[0-9]{3}$'
             ");
-            $stmt->execute(['RMR-' . $today . '-%']);
-            $lastRmr = $stmt->fetchColumn();
-            
-            if ($lastRmr) {
-                // Extract the sequence number and increment
-                $parts = explode('-', $lastRmr);
-                $sequence = intval(end($parts)) + 1;
-            } else {
-                $sequence = 1;
-            }
+            $stmt->execute([$datePrefix . '%']);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $sequence = ($result['max_seq'] ?? 0) + 1;
             
             $rmrNumber = sprintf('RMR-%s-%03d', $today, $sequence);
             
@@ -559,20 +566,26 @@ class MilkCollectionAPI extends BaseAPI
             $litersAccepted = $litersDelivered - $litersRejected;
             $totalAmount = ($litersAccepted * $basePricePerLiter) + $qualityPremium - $transportFee;
 
-            // Generate RMR number if not provided
-            $rmrNumber = $input['rmr_number'] ?? null;
+            // Generate RMR number if not provided or empty
+            $rmrNumber = !empty($input['rmr_number']) ? $input['rmr_number'] : null;
             if (!$rmrNumber) {
+                $datePrefix = 'RMR-' . date('Ymd', strtotime($collectionDate)) . '-';
+                // Find the max sequence number by extracting the numeric suffix from RMR numbers
+                // Pattern: RMR-YYYYMMDD-XXX where XXX is a 3-digit number
                 $stmt = $pdo->prepare("
-                    SELECT COUNT(*) + 1 as next_seq
+                    SELECT MAX(CAST(SUBSTRING(rmr_number, -3) AS UNSIGNED)) as max_seq
                     FROM milk_daily_collections
-                    WHERE DATE(collection_date) = ?
+                    WHERE rmr_number LIKE ?
+                      AND rmr_number REGEXP '^RMR-[0-9]{8}-[0-9]{3}$'
                 ");
-                $stmt->execute([$collectionDate]);
-                $nextSeq = $stmt->fetch(PDO::FETCH_ASSOC)['next_seq'];
-                $rmrNumber = 'RMR-' . date('Ymd', strtotime($collectionDate)) . '-' . str_pad($nextSeq, 3, '0', STR_PAD_LEFT);
+                $stmt->execute([$datePrefix . '%']);
+                $result = $stmt->fetch(PDO::FETCH_ASSOC);
+                $nextSeq = ($result['max_seq'] ?? 0) + 1;
+                $rmrNumber = $datePrefix . str_pad($nextSeq, 3, '0', STR_PAD_LEFT);
             }
 
             // Insert collection - matching actual table columns
+            // Note: liters_accepted is a generated column (liters_delivered - liters_rejected)
             $stmt = $pdo->prepare("
                 INSERT INTO milk_daily_collections (
                     rmr_number, collection_date, supplier_id, milk_type,
@@ -603,6 +616,75 @@ class MilkCollectionAPI extends BaseAPI
 
             $collectionId = $pdo->lastInsertId();
 
+            // =========================================================
+            // AUTO-CREATE RAW MATERIAL BATCH FOR PRODUCTION FIFO
+            // This ensures Production can see the milk immediately
+            // =========================================================
+            if ($litersAccepted > 0) {
+                // Get or create "Raw Milk" raw material
+                $stmt = $pdo->query("SELECT raw_material_id FROM raw_materials WHERE name = 'Raw Milk' LIMIT 1");
+                $rawMilk = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($rawMilk) {
+                    $rawMilkId = $rawMilk['raw_material_id'];
+                    
+                    // Check if batch already exists
+                    $stmt = $pdo->prepare("SELECT batch_id FROM raw_material_batches WHERE highland_fresh_batch_code = ?");
+                    $stmt->execute([$rmrNumber]);
+                    
+                    if (!$stmt->fetch()) {
+                        // Create batch with 48-hour expiry
+                        $expiryDate = date('Y-m-d H:i:s', strtotime($collectionDate . ' +48 hours'));
+                        
+                        $stmt = $pdo->prepare("
+                            INSERT INTO raw_material_batches (
+                                highland_fresh_batch_code,
+                                raw_material_id,
+                                supplier_id,
+                                quantity_received,
+                                current_quantity,
+                                unit_cost,
+                                received_date,
+                                expiry_date,
+                                quality_grade_received,
+                                status,
+                                highland_fresh_approved,
+                                milk_source_cooperative,
+                                notes,
+                                created_at,
+                                created_by
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Grade A', 'RECEIVED', 1, 'Highland Fresh', ?, NOW(), ?)
+                        ");
+                        
+                        $stmt->execute([
+                            $rmrNumber,
+                            $rawMilkId,
+                            $supplierId,
+                            $litersAccepted,
+                            $litersAccepted,
+                            $basePricePerLiter,
+                            $collectionDate,
+                            $expiryDate,
+                            "Auto-created from milk collection {$rmrNumber}",
+                            $user['id'] ?? null
+                        ]);
+                        
+                        // Update Raw Milk total quantity
+                        $pdo->exec("
+                            UPDATE raw_materials 
+                            SET quantity_on_hand = (
+                                SELECT COALESCE(SUM(current_quantity), 0) 
+                                FROM raw_material_batches 
+                                WHERE raw_material_id = {$rawMilkId} 
+                                  AND status IN ('RECEIVED', 'APPROVED') 
+                                  AND current_quantity > 0
+                            )
+                            WHERE raw_material_id = {$rawMilkId}
+                        ");
+                    }
+                }
+            }
+
             // Get the created collection with supplier info
             $stmt = $pdo->prepare("
                 SELECT c.*, s.name as supplier_name
@@ -621,6 +703,7 @@ class MilkCollectionAPI extends BaseAPI
             ]);
 
         } catch (Exception $e) {
+            error_log('MilkCollectionAPI createCollection Error: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
             $this->respondError('Failed to create collection: ' . $e->getMessage(), 500);
         }
     }
@@ -1048,15 +1131,19 @@ class MilkCollectionAPI extends BaseAPI
         try {
             $pdo = $this->db();
 
-            // Use TIMESTAMPDIFF as fallback if expiry_datetime column doesn't exist
-            // This marks any PENDING collection older than 48 hours as EXPIRED
+            // Also update the raw_material_batches table to mark expired milk
+            // This ensures Production Dashboard sees expired batches correctly
             $stmt = $pdo->prepare("
-                UPDATE milk_daily_collections 
-                SET notes = CONCAT(COALESCE(notes, ''), '\n[AUTO-EXPIRED: ', NOW(), ']')
-                WHERE (liters_rejected < liters_delivered OR liters_rejected IS NULL)
-                  AND liters_accepted > 0
-                  AND TIMESTAMPDIFF(HOUR, collection_date, NOW()) >= 48
-                  AND notes NOT LIKE '%AUTO-EXPIRED%'
+                UPDATE raw_material_batches 
+                SET status = 'EXPIRED'
+                WHERE raw_material_id = (SELECT raw_material_id FROM raw_materials WHERE name = 'Raw Milk' LIMIT 1)
+                  AND status IN ('RECEIVED', 'APPROVED')
+                  AND current_quantity > 0
+                  AND (
+                      (expiry_date IS NOT NULL AND expiry_date < NOW())
+                      OR 
+                      (expiry_date IS NULL AND TIMESTAMPDIFF(HOUR, received_date, NOW()) >= 48)
+                  )
             ");
             $stmt->execute();
 
