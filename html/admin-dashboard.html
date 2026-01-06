@@ -9,12 +9,344 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        :root {
+            --hf-green: #198754;
+            --hf-green-dark: #157347;
+            --hf-green-light: #d1edda;
+            --hf-green-hover: rgba(25, 135, 84, 0.1);
+        }
+
+        body {
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .admin-wrapper {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, var(--hf-green) 0%, var(--hf-green-dark) 100%);
+            color: white;
+            padding: 1.5rem 0;
+            position: fixed;
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 0 1.25rem 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-header h5 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.7;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .nav-section {
+            padding: 0.5rem 0;
+        }
+
+        .nav-section-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            opacity: 0.6;
+            padding: 0.5rem 1.25rem;
+            margin: 0;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.6rem 1.25rem;
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: all 0.15s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-left-color: white;
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 0.75rem;
+            font-size: 1rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 1rem 1.5rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 1400px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 0.875rem 1rem;
+            border: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .stat-card .stat-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 8px;
+            background: var(--hf-green-light);
+            color: var(--hf-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .stat-card .stat-info h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .stat-card .stat-info p {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin: 0.15rem 0 0;
+        }
+
+        /* Quick Access Grid */
+        .section-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            color: var(--hf-green);
+            margin-right: 0.5rem;
+        }
+
+        .quick-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 1400px) {
+            .quick-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .quick-grid { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; }
+        }
+
+        .quick-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 0.625rem 0.75rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+        }
+
+        .quick-card:hover {
+            border-color: var(--hf-green);
+            box-shadow: 0 2px 8px rgba(25, 135, 84, 0.12);
+            transform: translateY(-1px);
+            color: inherit;
+        }
+
+        .quick-card .q-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: var(--hf-green-light);
+            color: var(--hf-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+        }
+
+        .quick-card .q-text h6 {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin: 0;
+            color: #1e293b;
+        }
+
+        .quick-card .q-text p {
+            font-size: 0.65rem;
+            color: #64748b;
+            margin: 0;
+        }
+
+        /* Dashboard Panels */
+        .dashboard-panels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-panels { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .panel-header h6 {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin: 0;
+            color: #1e293b;
+        }
+
+        .panel-header .badge {
+            font-size: 0.65rem;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.625rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .activity-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--hf-green-light);
+            color: var(--hf-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .activity-icon.warning { background: #fef3c7; color: #d97706; }
+        .activity-icon.info { background: #dbeafe; color: #2563eb; }
+
+        .activity-text {
+            flex: 1;
+        }
+
+        .activity-text p {
+            font-size: 0.75rem;
+            color: #1e293b;
+            margin: 0;
+            line-height: 1.3;
+        }
+
+        .activity-text small {
+            font-size: 0.65rem;
+            color: #94a3b8;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .status-item span {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        .status-item .status-value {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .status-item .status-value.good { color: var(--hf-green); }
+        .status-item .status-value.warning { color: #d97706; }
+
+        /* Navbar adjustments */
+        .navbar {
+            height: 60px;
+            z-index: 1000;
+        }
+    </style>
 </head>
 
 <body>
 
     <nav class="navbar navbar-expand-lg">
-        <div class="container">
+        <div class="container-fluid px-4">
             <a class="navbar-brand" href="#">
                 <img src="../images/highland_fresh_logo.jpg" alt="Highland Fresh Logo" class="navbar-logo">
                 Highland Fresh
@@ -31,230 +363,206 @@
     </nav>
     <script src="../js/user-display-utils.js"></script>
     <script>window.addEventListener('DOMContentLoaded', initializeUserDisplay);</script>
-    <div class="container mt-4 mb-5">
-        <div class="row">
-            <div class="col-12">
-                <div class="card main-card">
-                    <div class="card-body">
-                        <h1 class="dashboard-title">Admin Dashboard</h1>
-                        <p class="dashboard-subtitle">Manage your Highland Fresh dairy operations with comprehensive
-                            admin tools</p>
 
-                        <div class="stats-row">
-                            <div class="row g-0">
-                                <div class="col-md-3 col-6">
-                                    <div class="stat-item">
-                                        <span class="stat-number" id="userCount">-</span>
-                                        <div class="stat-label">Active Users</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 col-6">
-                                    <div class="stat-item">
-                                        <span class="stat-number" id="productCount">-</span>
-                                        <div class="stat-label">Dairy Products</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 col-6">
-                                    <div class="stat-item">
-                                        <span class="stat-number" id="supplierCount">-</span>
-                                        <div class="stat-label">Suppliers</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 col-6">
-                                    <div class="stat-item">
-                                        <span class="stat-number" id="monthlyRevenue">-</span>
-                                        <div class="stat-label">Monthly Sales</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+    <div class="admin-wrapper">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h5>Admin Panel</h5>
+                <h2><i class="bi bi-speedometer2 me-2"></i>Dashboard</h2>
+            </div>
 
-                        <div class="row g-4">
-                            <div class="col-lg-4 col-md-6">
-                                <div class="card feature-card">
-                                    <div class="card-body">
-                                        <div class="feature-icon">
-                                            <i class="bi bi-people-fill"></i>
-                                        </div>
-                                        <h5 class="card-title">User Management</h5>
-                                        <p class="card-text">Manage user accounts, roles, and permissions for Highland
-                                            Fresh staff</p>
-                                        <a href="users.html" class="btn btn-feature">
-                                            Manage Users
-                                            <i class="bi bi-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-md-6">
-                                <div class="card feature-card">
-                                    <div class="card-body">
-                                        <div class="feature-icon">
-                                            <i class="bi bi-droplet"></i>
-                                        </div>
-                                        <h5 class="card-title">Product Management</h5>
-                                        <p class="card-text">Manage dairy products, inventory tracking, and Highland
-                                            Fresh catalog</p>
-                                        <a href="products.html" class="btn btn-feature">
-                                            Manage Products
-                                            <i class="bi bi-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-md-6">
-                                <div class="card feature-card">
-                                    <div class="card-body">
-                                        <div class="feature-icon">
-                                            <i class="bi bi-building"></i>
-                                        </div>
-                                        <h5 class="card-title">Warehouse Operations</h5>
-                                        <p class="card-text">PO receiving, order dispatch, and inventory management</p>
-                                        <a href="warehouse-staff-dashboard.html" class="btn btn-feature">
-                                            Open Warehouse
-                                            <i class="bi bi-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-md-6">
-                                <div class="card feature-card">
-                                    <div class="card-body">
-                                        <div class="feature-icon">
-                                            <i class="bi bi-gear-fill"></i>
-                                        </div>
-                                        <h5 class="card-title">Production Supervisor</h5>
-                                        <p class="card-text">Create production batches, manage recipes, and convert raw
-                                            materials to Highland Fresh products</p>
-                                        <a href="production-dashboard.html" class="btn btn-feature">
-                                            Manage Production
-                                            <i class="bi bi-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-md-6">
-                                <div class="card feature-card">
-                                    <div class="card-body">
-                                        <div class="feature-icon">
-                                            <i class="bi bi-truck"></i>
-                                        </div>
-                                        <h5 class="card-title">Supplier Management</h5>
-                                        <p class="card-text">Manage NMFDC cooperatives, individual farms, and dairy
-                                            suppliers</p>
-                                        <a href="suppliers.html" class="btn btn-feature">
-                                            Manage Suppliers
-                                            <i class="bi bi-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-md-6">
-                                <div class="card feature-card">
-                                    <div class="card-body">
-                                        <div class="feature-icon">
-                                            <i class="bi bi-cart4"></i>
-                                        </div>
-                                        <h5 class="card-title">Purchase Orders</h5>
-                                        <p class="card-text">Manage dairy procurement, milk quality, and cooperative
-                                            orders</p>
-                                        <a href="finance-dashboard.html" class="btn btn-feature">
-                                            Manage Orders
-                                            <i class="bi bi-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-md-6">
-                                <div class="card feature-card">
-                                    <div class="card-body">
-                                        <div class="feature-icon">
-                                            <i class="bi bi-graph-up"></i>
-                                        </div>
-                                        <h5 class="card-title">Reports & Analytics</h5>
-                                        <p class="card-text">View dairy business intelligence, sales reports, and
-                                            quality metrics</p>
-                                        <a href="transaction-history.html" class="btn btn-feature">
-                                            View Reports
-                                            <i class="bi bi-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-md-6">
-                                <div class="card feature-card">
-                                    <div class="card-body">
-                                        <div class="feature-icon">
-                                            <i class="bi bi-cash-coin"></i>
-                                        </div>
-                                        <h5 class="card-title">Point of Sale</h5>
-                                        <p class="card-text">Access Highland Fresh milk bar POS system for retail
-                                            operations</p>
-                                        <a href="sales-dashboard.html" class="btn btn-feature">
-                                            Open POS
-                                            <i class="bi bi-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- New Module Cards -->
-                            <div class="col-lg-4 col-md-6">
-                                <div class="card feature-card">
-                                    <div class="card-body">
-                                        <div class="feature-icon"
-                                            style="background: linear-gradient(135deg, #198754, #20c997);">
-                                            <i class="bi bi-clipboard-check"></i>
-                                        </div>
-                                        <h5 class="card-title">QC Dashboard</h5>
-                                        <p class="card-text">Milk collection entry, quality control tests, and aging
-                                            alerts</p>
-                                        <a href="qc-dashboard.html" class="btn btn-feature">
-                                            Open QC Dashboard
-                                            <i class="bi bi-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-md-6">
-                                <div class="card feature-card">
-                                    <div class="card-body">
-                                        <div class="feature-icon"
-                                            style="background: linear-gradient(135deg, #dc3545, #fd7e14);">
-                                            <i class="bi bi-cash-coin"></i>
-                                        </div>
-                                        <h5 class="card-title">Finance Dashboard</h5>
-                                        <p class="card-text">Spoilage reports, farmer payouts, and FIFO compliance
-                                            tracking</p>
-                                        <a href="finance-dashboard.html" class="btn btn-feature">
-                                            Open Finance
-                                            <i class="bi bi-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-md-6">
-                                <div class="card feature-card">
-                                    <div class="card-body">
-                                        <div class="feature-icon"
-                                            style="background: linear-gradient(135deg, #ffc107, #fd7e14);">
-                                            <i class="bi bi-box-seam"></i>
-                                        </div>
-                                        <h5 class="card-title">Inventory Requisition</h5>
-                                        <p class="card-text">Low stock alerts, purchase requests, and approval workflow
-                                        </p>
-                                        <a href="inventory-requisition.html" class="btn btn-feature">
-                                            View Requisitions
-                                            <i class="bi bi-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+            <div class="nav-section">
+                <p class="nav-section-title">Core Operations</p>
+                <a href="users.html" class="nav-link"><i class="bi bi-people-fill"></i> User Management</a>
+                <a href="products.html" class="nav-link"><i class="bi bi-droplet-fill"></i> Products</a>
+                <a href="suppliers.html" class="nav-link"><i class="bi bi-truck"></i> Suppliers</a>
+                <a href="raw-materials.html" class="nav-link"><i class="bi bi-box-seam"></i> Raw Materials</a>
+            </div>
+
+            <div class="nav-section">
+                <p class="nav-section-title">Production & Quality</p>
+                <a href="qc-dashboard.html" class="nav-link"><i class="bi bi-clipboard-check"></i> QC Dashboard</a>
+                <a href="production-dashboard.html" class="nav-link"><i class="bi bi-gear-fill"></i> Production</a>
+                <a href="warehouse-staff-dashboard.html" class="nav-link"><i class="bi bi-building"></i> Warehouse</a>
+                <a href="inventory-requisition.html" class="nav-link"><i class="bi bi-box-arrow-in-down"></i> Requisition</a>
+            </div>
+
+            <div class="nav-section">
+                <p class="nav-section-title">Sales & Finance</p>
+                <a href="sales-dashboard.html" class="nav-link"><i class="bi bi-cash-coin"></i> Point of Sale</a>
+                <a href="finance-dashboard.html" class="nav-link"><i class="bi bi-wallet2"></i> Finance</a>
+                <a href="sales-orders.html" class="nav-link"><i class="bi bi-cart4"></i> Sales Orders</a>
+                <a href="transaction-history.html" class="nav-link"><i class="bi bi-graph-up"></i> Reports</a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Stats Row -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+                    <div class="stat-info">
+                        <h3 id="userCount">-</h3>
+                        <p>Active Users</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="bi bi-droplet-fill"></i></div>
+                    <div class="stat-info">
+                        <h3 id="productCount">-</h3>
+                        <p>Dairy Products</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="bi bi-truck"></i></div>
+                    <div class="stat-info">
+                        <h3 id="supplierCount">-</h3>
+                        <p>Suppliers</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="bi bi-currency-dollar"></i></div>
+                    <div class="stat-info">
+                        <h3 id="monthlyRevenue">-</h3>
+                        <p>Monthly Sales</p>
                     </div>
                 </div>
             </div>
-        </div>
+
+            <!-- Quick Access -->
+            <h5 class="section-title"><i class="bi bi-lightning-fill"></i> Quick Access</h5>
+            <div class="quick-grid">
+                <a href="users.html" class="quick-card">
+                    <div class="q-icon"><i class="bi bi-person-plus"></i></div>
+                    <div class="q-text">
+                        <h6>Add User</h6>
+                        <p>Create new account</p>
+                    </div>
+                </a>
+                <a href="products.html" class="quick-card">
+                    <div class="q-icon"><i class="bi bi-plus-circle"></i></div>
+                    <div class="q-text">
+                        <h6>New Product</h6>
+                        <p>Add dairy product</p>
+                    </div>
+                </a>
+                <a href="qc-dashboard.html" class="quick-card">
+                    <div class="q-icon"><i class="bi bi-clipboard-check"></i></div>
+                    <div class="q-text">
+                        <h6>Milk Collection</h6>
+                        <p>Record collection</p>
+                    </div>
+                </a>
+                <a href="sales-dashboard.html" class="quick-card">
+                    <div class="q-icon"><i class="bi bi-cart-plus"></i></div>
+                    <div class="q-text">
+                        <h6>New Sale</h6>
+                        <p>POS transaction</p>
+                    </div>
+                </a>
+                <a href="production-dashboard.html" class="quick-card">
+                    <div class="q-icon"><i class="bi bi-gear-fill"></i></div>
+                    <div class="q-text">
+                        <h6>Production</h6>
+                        <p>Manage batches</p>
+                    </div>
+                </a>
+                <a href="warehouse-staff-dashboard.html" class="quick-card">
+                    <div class="q-icon"><i class="bi bi-building"></i></div>
+                    <div class="q-text">
+                        <h6>Warehouse</h6>
+                        <p>Inventory & dispatch</p>
+                    </div>
+                </a>
+                <a href="finance-dashboard.html" class="quick-card">
+                    <div class="q-icon"><i class="bi bi-wallet2"></i></div>
+                    <div class="q-text">
+                        <h6>Finance</h6>
+                        <p>Payouts & reports</p>
+                    </div>
+                </a>
+                <a href="transaction-history.html" class="quick-card">
+                    <div class="q-icon"><i class="bi bi-graph-up"></i></div>
+                    <div class="q-text">
+                        <h6>Reports</h6>
+                        <p>Analytics & metrics</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Dashboard Panels -->
+            <div class="dashboard-panels">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h6><i class="bi bi-clock-history me-1"></i> Recent Activity</h6>
+                        <span class="badge bg-success">Live</span>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon"><i class="bi bi-droplet-fill"></i></div>
+                        <div class="activity-text">
+                            <p>New milk collection recorded</p>
+                            <small>QC Dashboard • 10 mins ago</small>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon info"><i class="bi bi-cart-check"></i></div>
+                        <div class="activity-text">
+                            <p>Sales order #1024 completed</p>
+                            <small>POS • 25 mins ago</small>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon"><i class="bi bi-gear"></i></div>
+                        <div class="activity-text">
+                            <p>Production batch started</p>
+                            <small>Production • 1 hour ago</small>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon warning"><i class="bi bi-exclamation-triangle"></i></div>
+                        <div class="activity-text">
+                            <p>Low stock alert: Fresh Milk</p>
+                            <small>Inventory • 2 hours ago</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <h6><i class="bi bi-activity me-1"></i> System Status</h6>
+                        <span class="badge bg-success">All Systems OK</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Inventory Sync</span>
+                        <span class="status-value good"><i class="bi bi-check-circle me-1"></i>Active</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Pending Orders</span>
+                        <span class="status-value" id="pendingOrders">0</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Low Stock Items</span>
+                        <span class="status-value warning" id="lowStockItems">3</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Expiring Soon (3 days)</span>
+                        <span class="status-value warning" id="expiringSoon">5</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Today's Collections</span>
+                        <span class="status-value" id="todayCollections">0 L</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Today's Sales</span>
+                        <span class="status-value good" id="todaySales">₱0.00</span>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
     <script src="../js/api-handler.js"></script>
